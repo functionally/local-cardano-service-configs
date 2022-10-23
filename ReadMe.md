@@ -1,5 +1,99 @@
 # An EC2 Instance for Marlowe Runtime
 
+Note that the instructions relating to `cardano-db-sync` are optional, but it is very useful to have a `cardano-db-sync` database available for comparison against the Marlowe `chainseekd` database.
+
+
+## Building executables
+
+Before building executables, check out the following repositories into the `repos/` folder:
+
+```console
+cd repos/
+git clone git@github.com:input-output-hk/cardano-node.git -b 1.35.3
+git clone git@github.com:input-output-hk/cardano-db-sync.git -b 13.0.5
+git clone git@github.com:input-output-hk/marlowe-cardano.git -b main
+```
+
+Build `cardano-node` as follows:
+
+```console
+cd repos/cardano-node/
+nix-build -A cardano-node -o ../../build/cardano-node
+```
+
+Build `cardano-db-sync` as follows:
+
+```console
+cd repos/cardano-db-sync/
+nix-build -A cardano-db-sync -o ../../build/cardano-db-sync
+```
+
+Build or rebuild the Marlowe Runtime services as follows:
+```console
+cd repos
+./pull-and-build.sh
+```
+
+## Creating the databases
+
+Six PostgreSQL databases need to be created:
+
+```console
+createdb mainnet_chainseek
+createdb mainnet_dbsync
+createdb preprod_chainseek
+createdb preprod_dbsync
+createdb preview_chainseek
+createdb preview_dbsync
+```
+
+## Configuring the databases
+
+Edit the `networks/*/config/pgpass`, `networks/*/sqitch.conf`, and `networks/*/configure.env` files so that they reflect the `PGUSER` and `PGHOST` for the PostgreSQL installation.
+
+
+## Tuning PostgreSQL performance
+
+Database performance on `mainnet` will be awful unless the write-ahead log and other parameters are tuned:
+
+```diff
+122c122
+< shared_buffers = 128MB                        # min 128kB
+---
+> shared_buffers = 2GB                  # min 128kB
+124c124
+< #huge_pages = try                     # on, off, or try
+---
+> huge_pages = try                      # on, off, or try
+126,127c126,127
+< #temp_buffers = 8MB                   # min 800kB
+< #max_prepared_transactions = 0                # zero disables the feature
+---
+> temp_buffers = 2GB                    # min 800kB
+> max_prepared_transactions = 256               # zero disables the feature
+229c229
+< max_wal_size = 1GB
+---
+> max_wal_size = 4GB
+723c723
+< #max_pred_locks_per_transaction = 64  # min 10
+---
+> max_pred_locks_per_transaction = 256  # min 10
+```
+
+
+## Running services
+
+To run a service for a network, navigate to the `mainnet/`, `preprod/`, or `preview/` folder and then execute `source configure.env`. Then you can run one of the services in that terminal:
+
+```console
+run-node
+run-dbsync
+run-chainseekd
+run-history
+run-discovery
+run-tx
+```
 
 ## Using the instance by logging into it
 
