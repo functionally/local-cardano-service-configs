@@ -3,7 +3,7 @@
   "EnableLogging": true,
   "NetworkName": "preview",
   "NodeConfigFile": "node.json",
-  "PrometheusPort": 28080,
+  "PrometheusPort": 8080,
   "RequiresNetworkMagic": "RequiresMagic",
   "defaultBackends": [
     "KatipBK"
