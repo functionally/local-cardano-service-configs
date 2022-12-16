@@ -1,1 +1,1 @@
-gazelle:5432:preview_dbsync:bbush:*
+localhost:5432:preview_dbsync:bbush:*

@@ -1,1 +1,1 @@
-gazelle:5432:mainnet_dbsync:bbush:*
+localhost:5432:mainnet_dbsync:bbush:*
