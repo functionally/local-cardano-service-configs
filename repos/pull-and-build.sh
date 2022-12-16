@@ -8,6 +8,7 @@ git fetch
 git rebase origin/main
 
 nix build .#chainseekd -o ../../build/chainseekd
+nix build .#marlowe-chain-indexer -o ../../build/marlowe-chain-indexer
 nix build .#marlowe-history -o ../../build/marlowe-history
 nix build .#marlowe-discovery -o ../../build/marlowe-discovery
 nix build .#marlowe-tx -o ../../build/marlowe-tx

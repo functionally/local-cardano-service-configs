@@ -1,1 +1,1 @@
-/data/postgresql:5432:preview_dbsync:bbush:*
+gazelle:5432:preprod_dbsync:bbush:*

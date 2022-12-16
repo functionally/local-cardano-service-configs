@@ -1,1 +1,1 @@
-/data/postgresql:5432:mainnet_dbsync:bbush:*
+gazelle:5432:mainnet_dbsync:bbush:*
