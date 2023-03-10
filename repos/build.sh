@@ -4,6 +4,8 @@ set -ev
 
 cd marlowe-cardano
 
+nix build .#marlowe-cli -o ../../build/marlowe-cli
+
 nix build .#marlowe-chain-indexer -o ../../build/marlowe-chain-indexer
 nix build .#marlowe-chain-sync -o ../../build/marlowe-chain-sync
 nix build .#marlowe-indexer -o ../../build/marlowe-indexer
