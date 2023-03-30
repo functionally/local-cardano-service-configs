@@ -1,0 +1,194 @@
+services:
+
+  node:
+    environment:
+      - NETWORK=preview
+    healthcheck:
+      interval: 10s
+      retries: 10
+      test: socat -u OPEN:/dev/null UNIX-CONNECT:/ipc/node.socket
+      timeout: 5s
+    image: inputoutput/cardano-node:1.35.4
+    restart: unless-stopped
+    volumes:
+    - shared:/ipc
+    - node-db:/data/db
+
+  chain-indexer:
+    environment:
+    - HTTP_PORT=3781
+    - NODE_CONFIG=/ipc/config/node.json
+    - CARDANO_NODE_SOCKET_PATH=/ipc/node.socket
+    - DB_NAME=preview
+    - DB_USER=cardano
+    - DB_PASS=bcb33b5c09e31e3dd5a2b4ff0ee111e6
+    - DB_HOST=host.containers.internal
+  # healthcheck:
+  #   test: curl --fail http://localhost:3781 || exit 1
+  #   interval: 60s
+  #   retries: 5
+  #   start_period: 20s
+  #   timeout: 10s
+    depends_on:
+      node:
+        condition: service_healthy
+    image: bwbush/marlowe-chain-indexer:latest
+    user: 0:0
+    restart: unless-stopped
+    volumes:
+    - shared:/ipc
+
+  chain-sync:
+    environment:
+    - HTTP_PORT=3782
+    - HOST=0.0.0.0
+    - PORT=3715
+    - QUERY_PORT=3716
+    - JOB_PORT=3720
+    - NODE_CONFIG=/ipc/config/node.json
+    - CARDANO_NODE_SOCKET_PATH=/ipc/node.socket
+    - DB_NAME=preview
+    - DB_USER=cardano
+    - DB_PASS=bcb33b5c09e31e3dd5a2b4ff0ee111e6
+    - DB_HOST=host.containers.internal
+  # healthcheck:
+  #   test: curl --fail http://localhost:3782 || exit 1
+  #   interval: 60s
+  #   retries: 5
+  #   start_period: 20s
+  #   timeout: 10s
+    depends_on:
+      chain-indexer:
+        condition: service_started
+    image: bwbush/marlowe-chain-sync:latest
+    user: 0:0
+    restart: unless-stopped
+    ports:
+    - 23715:3715
+    - 23716:3716
+    - 23720:3720
+    volumes:
+    - shared:/ipc
+
+  indexer:
+    environment:
+    - HTTP_PORT=3783
+    - MARLOWE_CHAIN_SYNC_HOST=chain-sync
+    - MARLOWE_CHAIN_SYNC_PORT=3715
+    - MARLOWE_CHAIN_SYNC_QUERY_PORT=3716
+    - MARLOWE_CHAIN_SYNC_COMMAND_PORT=3720
+    - DB_NAME=preview
+    - DB_USER=cardano
+    - DB_PASS=bcb33b5c09e31e3dd5a2b4ff0ee111e6
+    - DB_HOST=host.containers.internal
+  # healthcheck:
+  #   test: curl --fail http://localhost:3783 || exit 1
+  #   interval: 60s
+  #   retries: 5
+  #   start_period: 20s
+  #   timeout: 10s
+    depends_on:
+      chain-sync:
+        condition: service_started
+    image: bwbush/marlowe-indexer:latest
+    restart: unless-stopped
+
+  sync:
+    environment:
+    - HTTP_PORT=3784
+    - HOST=0.0.0.0
+    - MARLOWE_SYNC_PORT=3724
+    - MARLOWE_HEADER_SYNC_PORT=3725
+    - MARLOWE_QUERY_PORT=3726
+    - DB_NAME=preview
+    - DB_USER=cardano
+    - DB_PASS=bcb33b5c09e31e3dd5a2b4ff0ee111e6
+    - DB_HOST=host.containers.internal
+  # healthcheck:
+  #   test: curl --fail http://localhost:3784 || exit 1
+  #   interval: 60s
+  #   retries: 5
+  #   start_period: 20s
+  #   timeout: 10s
+    depends_on:
+      indexer:
+        condition: service_started
+    image: bwbush/marlowe-sync:latest
+    restart: unless-stopped
+    ports:
+    - 23724:3724
+    - 23725:3725
+    - 23726:3726
+
+  tx:
+    environment:
+    - HTTP_PORT=3785
+    - HOST=0.0.0.0
+    - PORT=3723
+    - MARLOWE_CHAIN_SYNC_HOST=chain-sync
+    - MARLOWE_CHAIN_SYNC_PORT=3715
+    - MARLOWE_CHAIN_SYNC_QUERY_PORT=3716
+    - MARLOWE_CHAIN_SYNC_COMMAND_PORT=3720
+  # healthcheck:
+  #   test: curl --fail http://localhost:3785 || exit 1
+  #   interval: 60s
+  #   retries: 5
+  #   start_period: 20s
+  #   timeout: 10s
+    depends_on:
+      - chain-sync
+    image: bwbush/marlowe-tx:latest
+    restart: unless-stopped
+    ports:
+    - 23723:3723
+
+  proxy:
+    environment:
+    - HTTP_PORT=3786
+    - HOST=0.0.0.0
+    - PORT=3700
+    - TX_HOST=tx
+    - TX_PORT=3723
+    - SYNC_HOST=sync
+    - MARLOWE_SYNC_PORT=3724
+    - MARLOWE_HEADER_SYNC_PORT=3725
+    - MARLOWE_QUERY_PORT=3726
+  # healthcheck:
+  #   test: curl --fail http://localhost:3786 || exit 1
+  #   interval: 60s
+  #   retries: 5
+  #   start_period: 20s
+  #   timeout: 10s
+    depends_on:
+      - sync
+      - tx
+    image: bwbush/marlowe-proxy:latest
+    restart: unless-stopped
+    ports:
+    - 23700:3700
+
+  web-server:
+    environment:
+    - PORT=3780
+    - RUNTIME_HOST=proxy
+    - RUNTIME_PORT=3700
+  # healthcheck:
+  #   test: curl --fail http://localhost:3780/healthcheck || exit 1
+  #   interval: 60s
+  #   retries: 5
+  #   start_period: 20s
+  #   timeout: 10s
+    depends_on:
+      - proxy
+    image: bwbush/marlowe-web-server:latest
+    restart: unless-stopped
+    ports:
+    - 23780:3780
+
+volumes:
+  shared:
+    external:
+      name: ./.
+  node-db:
+    external:
+      name: ./node.db
