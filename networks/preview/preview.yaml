@@ -1,0 +1,310 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    io.kubernetes.cri-o.ContainerType/chain-indexer: container
+    io.kubernetes.cri-o.ContainerType/chain-sync: container
+    io.kubernetes.cri-o.ContainerType/marlowe-indexer: container
+    io.kubernetes.cri-o.ContainerType/node: container
+    io.kubernetes.cri-o.ContainerType/proxy: container
+    io.kubernetes.cri-o.ContainerType/marlowe-sync: container
+    io.kubernetes.cri-o.ContainerType/tx: container
+    io.kubernetes.cri-o.ContainerType/web-server: container
+    io.kubernetes.cri-o.TTY/chain-indexer: "false"
+    io.kubernetes.cri-o.TTY/chain-sync: "false"
+    io.kubernetes.cri-o.TTY/marlowe-indexer: "false"
+    io.kubernetes.cri-o.TTY/node: "false"
+    io.kubernetes.cri-o.TTY/proxy: "false"
+    io.kubernetes.cri-o.TTY/marlowe-sync: "false"
+    io.kubernetes.cri-o.TTY/tx: "false"
+    io.kubernetes.cri-o.TTY/web-server: "false"
+    io.podman.annotations.autoremove/chain-indexer: "FALSE"
+    io.podman.annotations.autoremove/chain-sync: "FALSE"
+    io.podman.annotations.autoremove/marlowe-indexer: "FALSE"
+    io.podman.annotations.autoremove/node: "FALSE"
+    io.podman.annotations.autoremove/proxy: "FALSE"
+    io.podman.annotations.autoremove/marlowe-sync: "FALSE"
+    io.podman.annotations.autoremove/tx: "FALSE"
+    io.podman.annotations.autoremove/web-server: "FALSE"
+    io.podman.annotations.init/chain-indexer: "FALSE"
+    io.podman.annotations.init/chain-sync: "FALSE"
+    io.podman.annotations.init/marlowe-indexer: "FALSE"
+    io.podman.annotations.init/node: "FALSE"
+    io.podman.annotations.init/proxy: "FALSE"
+    io.podman.annotations.init/marlowe-sync: "FALSE"
+    io.podman.annotations.init/tx: "FALSE"
+    io.podman.annotations.init/web-server: "FALSE"
+    io.podman.annotations.privileged/chain-indexer: "FALSE"
+    io.podman.annotations.privileged/chain-sync: "FALSE"
+    io.podman.annotations.privileged/marlowe-indexer: "FALSE"
+    io.podman.annotations.privileged/node: "FALSE"
+    io.podman.annotations.privileged/proxy: "FALSE"
+    io.podman.annotations.privileged/marlowe-sync: "FALSE"
+    io.podman.annotations.privileged/tx: "FALSE"
+    io.podman.annotations.privileged/web-server: "FALSE"
+    io.podman.annotations.publish-all/chain-indexer: "FALSE"
+    io.podman.annotations.publish-all/chain-sync: "FALSE"
+    io.podman.annotations.publish-all/marlowe-indexer: "FALSE"
+    io.podman.annotations.publish-all/node: "FALSE"
+    io.podman.annotations.publish-all/proxy: "FALSE"
+    io.podman.annotations.publish-all/marlowe-sync: "FALSE"
+    io.podman.annotations.publish-all/tx: "FALSE"
+    io.podman.annotations.publish-all/web-server: "FALSE"
+  creationTimestamp: "2023-03-31T15:18:45Z"
+  labels:
+    app: mrt-preview
+  name: mrt-preview
+spec:
+  hostname: mrt
+  containers:
+  - name: node
+    image: docker.io/inputoutput/cardano-node:1.35.4
+    command: ["/usr/local/bin/entrypoint"]
+    env:
+    - name: NETWORK
+      value: preview
+    volumeMounts:
+    - mountPath: /ipc
+      name: shared
+    - mountPath: /data/db
+      name: node-db
+  # livenessProbe:
+  #   exec:
+  #     command: ["socat", "-u", "OPEN:/dev/null", "UNIX-CONNECT:/ipc/node.socket"]
+  #   initialDelaySeconds: 40
+  #   periodSeconds: 20
+    resources: {}
+    securityContext:
+      capabilities: {}
+  - name: chain-indexer
+    image: docker.io/bwbush/marlowe-chain-indexer:latest
+    env:
+    - name: CARDANO_NODE_SOCKET_PATH
+      value: /ipc/node.socket
+    - name: DB_NAME
+      value: preview
+    - name: NODE_CONFIG
+      value: /ipc/config/node.json
+    - name: DB_PASS
+      value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
+    - name: DB_HOST
+      value: host.containers.internal
+    - name: HTTP_PORT
+      value: "3781"
+    - name: DB_USER
+      value: cardano
+    ports:
+    - hostPort: 23781
+      containerPort: 3781
+    volumeMounts:
+    - mountPath: /ipc
+      name: shared
+    - mountPath: /data/db
+      name: node-db
+    resources: {}
+    securityContext:
+      capabilities: {}
+      runAsGroup: 0
+      runAsUser: 0
+  - name: chain-sync
+    image: docker.io/bwbush/marlowe-chain-sync:latest
+    env:
+    - name: DB_USER
+      value: cardano
+    - name: HTTP_PORT
+      value: "3782"
+    - name: QUERY_PORT
+      value: "3716"
+    - name: JOB_PORT
+      value: "3720"
+    - name: NODE_CONFIG
+      value: /ipc/config/node.json
+    - name: PORT
+      value: "3715"
+    - name: DB_NAME
+      value: preview
+    - name: DB_PASS
+      value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
+    - name: DB_HOST
+      value: host.containers.internal
+    - name: HOST
+      value: mrt
+    - name: CARDANO_NODE_SOCKET_PATH
+      value: /ipc/node.socket
+    ports:
+    - hostPort: 23782
+      containerPort: 3782
+    - hostPort: 23715
+      containerPort: 3715
+    - hostPort: 23716
+      containerPort: 3716
+    - hostPort: 23720
+      containerPort: 3720
+    volumeMounts:
+    - mountPath: /ipc
+      name: shared
+    resources: {}
+    securityContext:
+      capabilities: {}
+      runAsGroup: 0
+      runAsUser: 0
+  - name: marlowe-indexer
+    image: docker.io/bwbush/marlowe-indexer:latest
+    env:
+    - name: HTTP_PORT
+      value: "3783"
+    - name: MARLOWE_CHAIN_SYNC_PORT
+      value: "3715"
+    - name: MARLOWE_CHAIN_SYNC_COMMAND_PORT
+      value: "3720"
+    - name: DB_NAME
+      value: preview
+    - name: DB_USER
+      value: cardano
+    - name: DB_PASS
+      value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
+    - name: DB_HOST
+      value: host.containers.internal
+    - name: MARLOWE_CHAIN_SYNC_HOST
+      value: mrt
+    - name: MARLOWE_CHAIN_SYNC_QUERY_PORT
+      value: "3716"
+    ports:
+    - hostPort: 23783
+      containerPort: 3783
+    resources: {}
+    securityContext:
+      capabilities: {}
+  - name: marlowe-sync
+    image: docker.io/bwbush/marlowe-sync:latest
+    env:
+    - name: DB_USER
+      value: cardano
+    - name: MARLOWE_HEADER_SYNC_PORT
+      value: "3725"
+    - name: MARLOWE_QUERY_PORT
+      value: "3726"
+    - name: HOST
+      value: mrt
+    - name: MARLOWE_SYNC_PORT
+      value: "3724"
+    - name: DB_HOST
+      value: host.containers.internal
+    - name: DB_NAME
+      value: preview
+    - name: DB_PASS
+      value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
+    - name: HTTP_PORT
+      value: "3784"
+    ports:
+    - hostPort: 23784
+      containerPort: 3784
+    - hostPort: 23724
+      containerPort: 3724
+    - hostPort: 23725
+      containerPort: 3725
+    - hostPort: 23726
+      containerPort: 3726
+    resources: {}
+    securityContext:
+      capabilities: {}
+  - name: tx
+    image: docker.io/bwbush/marlowe-tx:latest
+    env:
+    - name: HOST
+      value: mrt
+    - name: MARLOWE_CHAIN_SYNC_HOST
+      value: mrt
+    - name: MARLOWE_CHAIN_SYNC_PORT
+      value: "3715"
+    - name: MARLOWE_CHAIN_SYNC_QUERY_PORT
+      value: "3716"
+    - name: MARLOWE_CHAIN_SYNC_COMMAND_PORT
+      value: "3720"
+    - name: HTTP_PORT
+      value: "3785"
+    - name: PORT
+      value: "3723"
+    ports:
+    - hostPort: 23785
+      containerPort: 3785
+    - hostPort: 23720
+      containerPort: 3720
+    resources: {}
+    securityContext:
+      capabilities: {}
+  - name: proxy
+    image: docker.io/bwbush/marlowe-proxy:latest
+    env:
+    - name: HTTP_PORT
+      value: "3786"
+    - name: MARLOWE_QUERY_PORT
+      value: "3726"
+    - name: PORT
+      value: "3700"
+    - name: MARLOWE_HEADER_SYNC_PORT
+      value: "3725"
+    - name: TX_HOST
+      value: mrt
+    - name: TX_PORT
+      value: "3723"
+    - name: SYNC_HOST
+      value: mrt
+    - name: MARLOWE_SYNC_PORT
+      value: "3724"
+    - name: HOST
+      value: mrt
+    ports:
+    - hostPort: 23786
+      containerPort: 3786
+    - hostPort: 23700
+      containerPort: 3700
+  # startupProbe:
+  #   httpGet:
+  #     path: /startup
+  #     port: 3786
+  #   initialDelaySeconds: 11
+  #   periodSeconds: 20
+  # livenessProbe:
+  #   httpGet:
+  #     path: /live
+  #     port: 3786
+  #   initialDelaySeconds: 53
+  #   periodSeconds: 20
+  # readinessProbe:
+  #   httpGet:
+  #     path: /ready
+  #     port: 3786
+  #   initialDelaySeconds: 79
+  #   periodSeconds: 20
+    resources: {}
+    securityContext:
+      capabilities: {}
+  - name: web-server
+    image: docker.io/bwbush/marlowe-web-server:latest
+    env:
+    - name: RUNTIME_PORT
+      value: "3700"
+    - name: PORT
+      value: "3780"
+    - name: RUNTIME_HOST
+      value: mrt
+    ports:
+    - hostPort: 23780
+      containerPort: 3780
+    resources: {}
+    securityContext:
+      capabilities: {}
+  enableServiceLinks: false
+  automountServiceAccountToken: false
+  restartPolicy: Always
+  volumes:
+  - hostPath:
+      path: ./.
+      type: Directory
+    name: shared
+  - hostPath:
+      path: ./node.db
+      type: Directory
+    name: node-db
+status: {}
