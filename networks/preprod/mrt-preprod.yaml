@@ -52,8 +52,8 @@ metadata:
     io.podman.annotations.publish-all/web-server: "FALSE"
   creationTimestamp: "2023-03-31T15:18:45Z"
   labels:
-    app: mrt-preview
-  name: mrt-preview
+    app: mrt-preprod
+  name: mrt-preprod
 spec:
   hostname: mrt
   containers:
@@ -62,7 +62,7 @@ spec:
     command: ["/usr/local/bin/entrypoint"]
     env:
     - name: NETWORK
-      value: preview
+      value: preprod
     volumeMounts:
     - mountPath: /ipc
       name: shared
@@ -77,12 +77,12 @@ spec:
     securityContext:
       capabilities: {}
   - name: chain-indexer
-    image: docker.io/bwbush/marlowe-chain-indexer:latest
+    image: docker.io/bwbush/marlowe-chain-indexer:20230402d
     env:
     - name: CARDANO_NODE_SOCKET_PATH
       value: /ipc/node.socket
     - name: DB_NAME
-      value: preview
+      value: preprod
     - name: NODE_CONFIG
       value: /ipc/config/node.json
     - name: DB_PASS
@@ -94,7 +94,7 @@ spec:
     - name: DB_USER
       value: cardano
     ports:
-    - hostPort: 23781
+    - hostPort: 13781
       containerPort: 3781
     volumeMounts:
     - mountPath: /ipc
@@ -107,7 +107,7 @@ spec:
       runAsGroup: 0
       runAsUser: 0
   - name: chain-sync
-    image: docker.io/bwbush/marlowe-chain-sync:latest
+    image: docker.io/bwbush/marlowe-chain-sync:20230402d
     env:
     - name: DB_USER
       value: cardano
@@ -122,7 +122,7 @@ spec:
     - name: PORT
       value: "3715"
     - name: DB_NAME
-      value: preview
+      value: preprod
     - name: DB_PASS
       value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
     - name: DB_HOST
@@ -132,13 +132,13 @@ spec:
     - name: CARDANO_NODE_SOCKET_PATH
       value: /ipc/node.socket
     ports:
-    - hostPort: 23782
+    - hostPort: 13782
       containerPort: 3782
-    - hostPort: 23715
+    - hostPort: 13715
       containerPort: 3715
-    - hostPort: 23716
+    - hostPort: 13716
       containerPort: 3716
-    - hostPort: 23720
+    - hostPort: 13720
       containerPort: 3720
     volumeMounts:
     - mountPath: /ipc
@@ -149,7 +149,7 @@ spec:
       runAsGroup: 0
       runAsUser: 0
   - name: marlowe-indexer
-    image: docker.io/bwbush/marlowe-indexer:latest
+    image: docker.io/bwbush/marlowe-indexer:20230402d
     env:
     - name: HTTP_PORT
       value: "3783"
@@ -158,7 +158,7 @@ spec:
     - name: MARLOWE_CHAIN_SYNC_COMMAND_PORT
       value: "3720"
     - name: DB_NAME
-      value: preview
+      value: preprod
     - name: DB_USER
       value: cardano
     - name: DB_PASS
@@ -170,13 +170,13 @@ spec:
     - name: MARLOWE_CHAIN_SYNC_QUERY_PORT
       value: "3716"
     ports:
-    - hostPort: 23783
+    - hostPort: 13783
       containerPort: 3783
     resources: {}
     securityContext:
       capabilities: {}
   - name: marlowe-sync
-    image: docker.io/bwbush/marlowe-sync:latest
+    image: docker.io/bwbush/marlowe-sync:20230402d
     env:
     - name: DB_USER
       value: cardano
@@ -191,25 +191,25 @@ spec:
     - name: DB_HOST
       value: host.containers.internal
     - name: DB_NAME
-      value: preview
+      value: preprod
     - name: DB_PASS
       value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
     - name: HTTP_PORT
       value: "3784"
     ports:
-    - hostPort: 23784
+    - hostPort: 13784
       containerPort: 3784
-    - hostPort: 23724
+    - hostPort: 13724
       containerPort: 3724
-    - hostPort: 23725
+    - hostPort: 13725
       containerPort: 3725
-    - hostPort: 23726
+    - hostPort: 13726
       containerPort: 3726
     resources: {}
     securityContext:
       capabilities: {}
   - name: tx
-    image: docker.io/bwbush/marlowe-tx:latest
+    image: docker.io/bwbush/marlowe-tx:20230402d
     env:
     - name: HOST
       value: mrt
@@ -226,15 +226,15 @@ spec:
     - name: PORT
       value: "3723"
     ports:
-    - hostPort: 23785
+    - hostPort: 13785
       containerPort: 3785
-    - hostPort: 23720
+    - hostPort: 13720
       containerPort: 3720
     resources: {}
     securityContext:
       capabilities: {}
   - name: proxy
-    image: docker.io/bwbush/marlowe-proxy:latest
+    image: docker.io/bwbush/marlowe-proxy:20230402d
     env:
     - name: HTTP_PORT
       value: "3786"
@@ -255,9 +255,9 @@ spec:
     - name: HOST
       value: mrt
     ports:
-    - hostPort: 23786
+    - hostPort: 13786
       containerPort: 3786
-    - hostPort: 23700
+    - hostPort: 13700
       containerPort: 3700
   # startupProbe:
   #   httpGet:
@@ -281,7 +281,7 @@ spec:
     securityContext:
       capabilities: {}
   - name: web-server
-    image: docker.io/bwbush/marlowe-web-server:latest
+    image: docker.io/bwbush/marlowe-web-server:20230402d
     env:
     - name: RUNTIME_PORT
       value: "3700"
@@ -290,7 +290,7 @@ spec:
     - name: RUNTIME_HOST
       value: mrt
     ports:
-    - hostPort: 23780
+    - hostPort: 13780
       containerPort: 3780
     resources: {}
     securityContext:
