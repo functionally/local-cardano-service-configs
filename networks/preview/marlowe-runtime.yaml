@@ -52,8 +52,8 @@ metadata:
     io.podman.annotations.publish-all/web-server: "FALSE"
   creationTimestamp: "2023-03-31T15:18:45Z"
   labels:
-    app: mrt-preprod
-  name: mrt-preprod
+    app: mrt-preview
+  name: mrt-preview
 spec:
   hostname: mrt
   containers:
@@ -62,7 +62,7 @@ spec:
     command: ["/usr/local/bin/entrypoint"]
     env:
     - name: NETWORK
-      value: preprod
+      value: preview
     volumeMounts:
     - mountPath: /ipc
       name: shared
@@ -76,13 +76,38 @@ spec:
     resources: {}
     securityContext:
       capabilities: {}
+  - name: dbsync
+    image: docker.io/inputoutput/cardano-db-sync:13.1.0.2
+    env:
+    - name: PATH
+      value: /usr/bin:/bin
+    - name: NETWORK
+      value: preview
+    - name: POSTGRES_HOST
+      value: host.containers.internal
+    - name: POSTGRES_PORT
+      value: 5432
+    - name: POSTGRES_DB
+      value: preview
+    - name: POSTGRES_USER
+      value: cardano
+    - name: POSTGRES_PASSWORD
+      value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
+    volumeMounts:
+    - mountPath: /node-ipc
+      name: shared
+    - mountPath: /var/lib/cexplorer
+      name: dbsync-data
+    resources: {}
+    securityContext:
+      capabilities: {}
   - name: chain-indexer
     image: docker.io/bwbush/marlowe-chain-indexer:20230402d
     env:
     - name: CARDANO_NODE_SOCKET_PATH
       value: /ipc/node.socket
     - name: DB_NAME
-      value: preprod
+      value: preview
     - name: NODE_CONFIG
       value: /ipc/config/node.json
     - name: DB_PASS
@@ -94,7 +119,7 @@ spec:
     - name: DB_USER
       value: cardano
     ports:
-    - hostPort: 13781
+    - hostPort: 23781
       containerPort: 3781
     volumeMounts:
     - mountPath: /ipc
@@ -122,7 +147,7 @@ spec:
     - name: PORT
       value: "3715"
     - name: DB_NAME
-      value: preprod
+      value: preview
     - name: DB_PASS
       value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
     - name: DB_HOST
@@ -132,13 +157,13 @@ spec:
     - name: CARDANO_NODE_SOCKET_PATH
       value: /ipc/node.socket
     ports:
-    - hostPort: 13782
+    - hostPort: 23782
       containerPort: 3782
-    - hostPort: 13715
+    - hostPort: 23715
       containerPort: 3715
-    - hostPort: 13716
+    - hostPort: 23716
       containerPort: 3716
-    - hostPort: 13720
+    - hostPort: 23720
       containerPort: 3720
     volumeMounts:
     - mountPath: /ipc
@@ -158,7 +183,7 @@ spec:
     - name: MARLOWE_CHAIN_SYNC_COMMAND_PORT
       value: "3720"
     - name: DB_NAME
-      value: preprod
+      value: preview
     - name: DB_USER
       value: cardano
     - name: DB_PASS
@@ -170,7 +195,7 @@ spec:
     - name: MARLOWE_CHAIN_SYNC_QUERY_PORT
       value: "3716"
     ports:
-    - hostPort: 13783
+    - hostPort: 23783
       containerPort: 3783
     resources: {}
     securityContext:
@@ -191,19 +216,19 @@ spec:
     - name: DB_HOST
       value: host.containers.internal
     - name: DB_NAME
-      value: preprod
+      value: preview
     - name: DB_PASS
       value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
     - name: HTTP_PORT
       value: "3784"
     ports:
-    - hostPort: 13784
+    - hostPort: 23784
       containerPort: 3784
-    - hostPort: 13724
+    - hostPort: 23724
       containerPort: 3724
-    - hostPort: 13725
+    - hostPort: 23725
       containerPort: 3725
-    - hostPort: 13726
+    - hostPort: 23726
       containerPort: 3726
     resources: {}
     securityContext:
@@ -226,9 +251,9 @@ spec:
     - name: PORT
       value: "3723"
     ports:
-    - hostPort: 13785
+    - hostPort: 23785
       containerPort: 3785
-    - hostPort: 13720
+    - hostPort: 23720
       containerPort: 3720
     resources: {}
     securityContext:
@@ -255,9 +280,9 @@ spec:
     - name: HOST
       value: mrt
     ports:
-    - hostPort: 13786
+    - hostPort: 23786
       containerPort: 3786
-    - hostPort: 13700
+    - hostPort: 23700
       containerPort: 3700
   # startupProbe:
   #   httpGet:
@@ -290,7 +315,7 @@ spec:
     - name: RUNTIME_HOST
       value: mrt
     ports:
-    - hostPort: 13780
+    - hostPort: 23780
       containerPort: 3780
     resources: {}
     securityContext:
@@ -307,4 +332,8 @@ spec:
       path: ./node.db
       type: Directory
     name: node-db
+  - hostPath:
+      path: ./db-sync.state
+      type: Directory
+    name: dbsync-data
 status: {}

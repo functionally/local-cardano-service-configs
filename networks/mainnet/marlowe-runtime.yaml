@@ -76,6 +76,31 @@ spec:
     resources: {}
     securityContext:
       capabilities: {}
+  - name: dbsync
+    image: docker.io/inputoutput/cardano-db-sync:13.1.0.2
+    env:
+    - name: PATH
+      value: /usr/bin:/bin
+    - name: NETWORK
+      value: mainnet
+    - name: POSTGRES_HOST
+      value: host.containers.internal
+    - name: POSTGRES_PORT
+      value: 5432
+    - name: POSTGRES_DB
+      value: mainnet
+    - name: POSTGRES_USER
+      value: cardano
+    - name: POSTGRES_PASSWORD
+      value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
+    volumeMounts:
+    - mountPath: /node-ipc
+      name: shared
+    - mountPath: /var/lib/cexplorer
+      name: dbsync-data
+    resources: {}
+    securityContext:
+      capabilities: {}
   - name: chain-indexer
     image: docker.io/bwbush/marlowe-chain-indexer:20230402d
     env:
@@ -307,4 +332,8 @@ spec:
       path: ./node.db
       type: Directory
     name: node-db
+  - hostPath:
+      path: ./db-sync.state
+      type: Directory
+    name: dbsync-data
 status: {}
