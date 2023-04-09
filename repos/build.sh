@@ -12,7 +12,7 @@ nix build .#marlowe-indexer -o ../../build/marlowe-indexer
 nix build .#marlowe-sync -o ../../build/marlowe-sync
 nix build .#marlowe-tx -o ../../build/marlowe-tx
 nix build .#marlowe-proxy -o ../../build/marlowe-proxy
-nix build .#marlowe-rt -o ../../build/marlowe
+nix build .#marlowe-runtime-cli -o ../../build/marlowe-runtime-cli
 
 nix build .#marlowe-web-server -o ../../build/marlowe-web-server
 

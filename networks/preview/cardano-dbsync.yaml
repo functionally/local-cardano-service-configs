@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: dbsync-preview
+  name: dbsync-preview
+spec:
+  hostname: dbsync
+  containers:
+  - name: dbsync
+    image: docker.io/inputoutput/cardano-db-sync:13.1.0.2
+    env:
+    - name: PATH
+      value: /usr/bin:/bin
+    - name: NETWORK
+      value: preview
+    - name: POSTGRES_HOST
+      value: host.containers.internal
+    - name: POSTGRES_PORT
+      value: 5432
+    - name: POSTGRES_DB
+      value: preview
+    - name: POSTGRES_USER
+      value: cardano
+    - name: POSTGRES_PASSWORD
+      value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
+    volumeMounts:
+    - mountPath: /node-ipc
+      name: shared
+    - mountPath: /var/lib/cexplorer
+      name: dbsync-data
+    resources: {}
+    securityContext:
+      capabilities: {}
+  enableServiceLinks: false
+  automountServiceAccountToken: false
+  restartPolicy: Always
+  volumes:
+  - hostPath:
+      path: ./.
+      type: Directory
+    name: shared
+  - hostPath:
+      path: ./db-sync.state
+      type: Directory
+    name: dbsync-data
+status: {}
