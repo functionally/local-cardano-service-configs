@@ -27,7 +27,7 @@ spec:
     securityContext:
       capabilities: {}
   - name: chain-indexer
-    image: docker.io/bwbush/marlowe-chain-indexer:v0.0.1
+    image: ghcr.io/input-output-hk/marlowe-chain-indexer:0.0.1
     env:
     - name: CARDANO_NODE_SOCKET_PATH
       value: /ipc/node.socket
@@ -57,7 +57,7 @@ spec:
       runAsGroup: 0
       runAsUser: 0
   - name: chain-sync
-    image: docker.io/bwbush/marlowe-chain-sync:v0.0.1
+    image: ghcr.io/input-output-hk/marlowe-chain-sync:0.0.1
     env:
     - name: DB_USER
       value: cardano
@@ -99,7 +99,7 @@ spec:
       runAsGroup: 0
       runAsUser: 0
   - name: marlowe-indexer
-    image: docker.io/bwbush/marlowe-indexer:v0.0.1
+    image: ghcr.io/input-output-hk/marlowe-indexer:0.0.1
     env:
     - name: HTTP_PORT
       value: "3783"
@@ -126,7 +126,7 @@ spec:
     securityContext:
       capabilities: {}
   - name: marlowe-sync
-    image: docker.io/bwbush/marlowe-sync:v0.0.1
+    image: ghcr.io/input-output-hk/marlowe-sync:0.0.1
     env:
     - name: DB_USER
       value: cardano
@@ -159,7 +159,7 @@ spec:
     securityContext:
       capabilities: {}
   - name: tx
-    image: docker.io/bwbush/marlowe-tx:v0.0.1
+    image: ghcr.io/input-output-hk/marlowe-tx:0.0.1
     env:
     - name: HOST
       value: mrt
@@ -184,7 +184,7 @@ spec:
     securityContext:
       capabilities: {}
   - name: proxy
-    image: docker.io/bwbush/marlowe-proxy:v0.0.1
+    image: ghcr.io/input-output-hk/marlowe-proxy:0.0.1
     env:
     - name: HTTP_PORT
       value: "3786"
@@ -231,7 +231,7 @@ spec:
     securityContext:
       capabilities: {}
   - name: web-server
-    image: docker.io/bwbush/marlowe-web-server:v0.0.1
+    image: ghcr.io/input-output-hk/marlowe-web-server:0.0.1
     env:
     - name: RUNTIME_PORT
       value: "3700"
