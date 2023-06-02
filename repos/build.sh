@@ -11,9 +11,10 @@ nix build .#marlowe-chain-sync -o ../../build/marlowe-chain-sync
 nix build .#marlowe-indexer -o ../../build/marlowe-indexer
 nix build .#marlowe-sync -o ../../build/marlowe-sync
 nix build .#marlowe-tx -o ../../build/marlowe-tx
+nix build .#marlowe-contract -o ../../build/marlowe-contract
 nix build .#marlowe-proxy -o ../../build/marlowe-proxy
-nix build .#marlowe-runtime-cli -o ../../build/marlowe-runtime-cli
 
+nix build .#marlowe-runtime-cli -o ../../build/marlowe-runtime-cli
 nix build .#marlowe-web-server -o ../../build/marlowe-web-server
 
 nix build .#marlowe.haskell.packages.marlowe-apps.components.exes.marlowe-pipe -o ../../build/marlowe-pipe

@@ -1,15 +1,43 @@
+
 apiVersion: v1
+
 kind: Pod
+
 metadata:
+  name: mrt-mainnet
   labels:
     app: mrt-mainnet
-  name: mrt-mainnet
+
 spec:
-  hostname: mrt
+
+  hostname: mrt-mainnet
+
   containers:
+
+  - name: otel-collector
+    image: docker.io/otel/opentelemetry-collector-contrib:0.76.1
+    args:
+    - --config=/etc/otel-collector-config.yml
+    ports:
+    - hostPort: 54317
+      containerPort: 4317
+    - hostPort: 54318
+      containerPort: 4318
+    - hostPort: 58888
+      containerPort: 8888
+    volumeMounts:
+    - mountPath: /etc/otel-collector-config.yml
+      name: otel-config
+##  resources: {}
+##  securityContext:
+##    capabilities: {}
+##    runAsGroup: 0
+##    runAsUser: 0
+
   - name: node
     image: docker.io/inputoutput/cardano-node:1.35.4
-    command: ["/usr/local/bin/entrypoint"]
+    command:
+    - /usr/local/bin/entrypoint
     env:
     - name: NETWORK
       value: mainnet
@@ -18,31 +46,37 @@ spec:
       name: shared
     - mountPath: /data/db
       name: node-db
-  # livenessProbe:
-  #   exec:
-  #     command: ["socat", "-u", "OPEN:/dev/null", "UNIX-CONNECT:/ipc/node.socket"]
-  #   initialDelaySeconds: 40
-  #   periodSeconds: 20
-    resources: {}
-    securityContext:
-      capabilities: {}
+##  resources: {}
+##  securityContext:
+##    capabilities: {}
+##    runAsGroup: 0
+##    runAsUser: 0
+
   - name: chain-indexer
-    image: docker.io/bwbush/marlowe-chain-indexer:v0.0.1
+    image: docker.io/bwbush/marlowe-chain-indexer:20230601a
+    depends_on:
+    - node
     env:
     - name: CARDANO_NODE_SOCKET_PATH
       value: /ipc/node.socket
-    - name: DB_NAME
-      value: mainnet
     - name: NODE_CONFIG
       value: /ipc/config/node.json
-    - name: DB_PASS
-      value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
     - name: DB_HOST
       value: host.containers.internal
-    - name: HTTP_PORT
-      value: "3781"
     - name: DB_USER
       value: cardano
+    - name: DB_PASS
+      value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
+    - name: DB_NAME
+      value: mainnet
+    - name: HTTP_PORT
+      value: 3781
+    - name: OTEL_SERVICE_NAME
+      value: mainnet-chain-indexer
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: http://mrt-mainnet:4318
+    - name: TZ
+      value: UTC
     ports:
     - hostPort: 53781
       containerPort: 3781
@@ -51,210 +85,311 @@ spec:
       name: shared
     - mountPath: /data/db
       name: node-db
-    resources: {}
-    securityContext:
-      capabilities: {}
-      runAsGroup: 0
-      runAsUser: 0
+##  resources: {}
+##  securityContext:
+##    capabilities: {}
+##    runAsGroup: 0
+##    runAsUser: 0
+
   - name: chain-sync
-    image: docker.io/bwbush/marlowe-chain-sync:v0.0.1
+    image: docker.io/bwbush/marlowe-chain-sync:20230601a
+    depends_on:
+    - node
     env:
-    - name: DB_USER
-      value: cardano
-    - name: HTTP_PORT
-      value: "3782"
-    - name: QUERY_PORT
-      value: "3716"
-    - name: JOB_PORT
-      value: "3720"
-    - name: NODE_CONFIG
-      value: /ipc/config/node.json
-    - name: PORT
-      value: "3715"
-    - name: DB_NAME
-      value: mainnet
-    - name: DB_PASS
-      value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
-    - name: DB_HOST
-      value: host.containers.internal
     - name: HOST
-      value: mrt
+      value: mrt-mainnet
+    - name: PORT
+      value: 3715
+    - name: QUERY_PORT
+      value: 3716
+    - name: JOB_PORT
+      value: 3720
     - name: CARDANO_NODE_SOCKET_PATH
       value: /ipc/node.socket
+    - name: NODE_CONFIG
+      value: /ipc/config/node.json
+    - name: DB_HOST
+      value: host.containers.internal
+    - name: DB_USER
+      value: cardano
+    - name: DB_PASS
+      value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
+    - name: DB_NAME
+      value: mainnet
+    - name: HTTP_PORT
+      value: 3782
+    - name: OTEL_SERVICE_NAME
+      value: mainnet-chain-sync
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: http://mrt-mainnet:4318
+    - name: TZ
+      value: UTC
     ports:
-    - hostPort: 53782
-      containerPort: 3782
     - hostPort: 53715
       containerPort: 3715
     - hostPort: 53716
       containerPort: 3716
     - hostPort: 53720
       containerPort: 3720
+    - hostPort: 53782
+      containerPort: 3782
     volumeMounts:
     - mountPath: /ipc
       name: shared
-    resources: {}
-    securityContext:
-      capabilities: {}
-      runAsGroup: 0
-      runAsUser: 0
+##  resources: {}
+##  securityContext:
+##    capabilities: {}
+##    runAsGroup: 0
+##    runAsUser: 0
+
   - name: marlowe-indexer
-    image: docker.io/bwbush/marlowe-indexer:v0.0.1
+    image: docker.io/bwbush/marlowe-indexer:20230601a
+    depends_on:
+    - chain-sync
     env:
-    - name: HTTP_PORT
-      value: "3783"
-    - name: MARLOWE_CHAIN_SYNC_PORT
-      value: "3715"
-    - name: MARLOWE_CHAIN_SYNC_COMMAND_PORT
-      value: "3720"
-    - name: DB_NAME
-      value: mainnet
+    - name: DB_HOST
+      value: host.containers.internal
     - name: DB_USER
       value: cardano
     - name: DB_PASS
       value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
-    - name: DB_HOST
-      value: host.containers.internal
+    - name: DB_NAME
+      value: mainnet
     - name: MARLOWE_CHAIN_SYNC_HOST
-      value: mrt
+      value: mrt-mainnet
+    - name: MARLOWE_CHAIN_SYNC_PORT
+      value: 3715
     - name: MARLOWE_CHAIN_SYNC_QUERY_PORT
-      value: "3716"
+      value: 3716
+    - name: HTTP_PORT
+      value: 3783
+    - name: OTEL_SERVICE_NAME
+      value: mainnet-marlowe-indexer
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: http://mrt-mainnet:4318
+    - name: TZ
+      value: UTC
     ports:
     - hostPort: 53783
       containerPort: 3783
-    resources: {}
-    securityContext:
-      capabilities: {}
+##  resources: {}
+##  securityContext:
+##    capabilities: {}
+##    runAsGroup: 0
+##    runAsUser: 0
+
   - name: marlowe-sync
-    image: docker.io/bwbush/marlowe-sync:v0.0.1
+    image: docker.io/bwbush/marlowe-sync:20230601a
     env:
-    - name: DB_USER
-      value: cardano
-    - name: MARLOWE_HEADER_SYNC_PORT
-      value: "3725"
-    - name: MARLOWE_QUERY_PORT
-      value: "3726"
-    - name: HOST
-      value: mrt
-    - name: MARLOWE_SYNC_PORT
-      value: "3724"
     - name: DB_HOST
       value: host.containers.internal
-    - name: DB_NAME
-      value: mainnet
+    - name: DB_USER
+      value: cardano
     - name: DB_PASS
       value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
+    - name: DB_NAME
+      value: mainnet
+    - name: HOST
+      value: mrt-mainnet
+    - name: MARLOWE_SYNC_PORT
+      value: 3724
+    - name: MARLOWE_HEADER_SYNC_PORT
+      value: 3725
+    - name: MARLOWE_QUERY_PORT
+      value: 3726
     - name: HTTP_PORT
-      value: "3784"
+      value: 3784
+    - name: OTEL_SERVICE_NAME
+      value: mainnet-marlowe-sync
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: http://mrt-mainnet:4318
+    - name: TZ
+      value: UTC
     ports:
-    - hostPort: 53784
-      containerPort: 3784
     - hostPort: 53724
       containerPort: 3724
     - hostPort: 53725
       containerPort: 3725
     - hostPort: 53726
       containerPort: 3726
-    resources: {}
-    securityContext:
-      capabilities: {}
+    - hostPort: 53784
+      containerPort: 3784
+##  resources: {}
+##  securityContext:
+##    capabilities: {}
+##    runAsGroup: 0
+##    runAsUser: 0
+  
   - name: tx
-    image: docker.io/bwbush/marlowe-tx:v0.0.1
+    image: docker.io/bwbush/marlowe-tx:20230601a
+    depends_on:
+    - chain-sync
     env:
     - name: HOST
-      value: mrt
-    - name: MARLOWE_CHAIN_SYNC_HOST
-      value: mrt
-    - name: MARLOWE_CHAIN_SYNC_PORT
-      value: "3715"
-    - name: MARLOWE_CHAIN_SYNC_QUERY_PORT
-      value: "3716"
-    - name: MARLOWE_CHAIN_SYNC_COMMAND_PORT
-      value: "3720"
-    - name: HTTP_PORT
-      value: "3785"
+      value: mrt-mainnet
     - name: PORT
-      value: "3723"
+      value: 3723
+    - name: MARLOWE_CHAIN_SYNC_HOST
+      value: mrt-mainnet
+    - name: MARLOWE_CHAIN_SYNC_PORT
+      value: 3715
+    - name: MARLOWE_CHAIN_SYNC_QUERY_PORT
+      value: 3716
+    - name: MARLOWE_CHAIN_SYNC_COMMAND_PORT
+      value: 3720
+    - name: HTTP_PORT
+      value: 3785
+    - name: OTEL_SERVICE_NAME
+      value: mainnet-marlowe-tx
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: http://mrt-mainnet:4318
+    - name: TZ
+      value: UTC
     ports:
+    - hostPort: 53723
+      containerPort: 3723
     - hostPort: 53785
       containerPort: 3785
-    - hostPort: 53720
-      containerPort: 3720
-    resources: {}
-    securityContext:
-      capabilities: {}
-  - name: proxy
-    image: docker.io/bwbush/marlowe-proxy:v0.0.1
+##  resources: {}
+##  securityContext:
+##    capabilities: {}
+##    runAsGroup: 0
+##    runAsUser: 0
+  
+  - name: contract
+    image: docker.io/bwbush/marlowe-contract:20230601a
     env:
-    - name: HTTP_PORT
-      value: "3786"
-    - name: MARLOWE_QUERY_PORT
-      value: "3726"
-    - name: PORT
-      value: "3700"
-    - name: MARLOWE_HEADER_SYNC_PORT
-      value: "3725"
-    - name: TX_HOST
-      value: mrt
-    - name: TX_PORT
-      value: "3723"
-    - name: SYNC_HOST
-      value: mrt
-    - name: MARLOWE_SYNC_PORT
-      value: "3724"
     - name: HOST
-      value: mrt
+      value: mrt-mainnet
+    - name: PORT
+      value: 3727
+    - name: QUERY_PORT
+      value: 3728
+    - name: STORE_DIR
+      value: /store
+    - name: HTTP_PORT
+      value: 3786
+    - name: OTEL_SERVICE_NAME
+      value: mainnet-marlowe-contract
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: http://mrt-mainnet:4318
+    - name: TZ
+      value: UTC
     ports:
+    - hostPort: 53727
+      containerPort: 3727
+    - hostPort: 53728
+      containerPort: 3728
     - hostPort: 53786
       containerPort: 3786
+    volumeMounts:
+    - mountPath: /store
+      name: contracts
+##  resources: {}
+##  securityContext:
+##    capabilities: {}
+##    runAsGroup: 0
+##    runAsUser: 0
+  
+  - name: proxy
+    image: docker.io/bwbush/marlowe-proxy:20230601a
+    depends_on:
+    - marlowe-sync
+    - tx
+    - contract
+    env:
+    - name: HOST
+      value: mrt-mainnet
+    - name: PORT
+      value: 3700
+    - name: TRACED_PORT
+      value: 3701
+    - name: SYNC_HOST
+      value: mrt-mainnet
+    - name: MARLOWE_SYNC_PORT
+      value: 3724
+    - name: MARLOWE_HEADER_SYNC_PORT
+      value: 3725
+    - name: MARLOWE_QUERY_PORT
+      value: 3726
+    - name: CONTRACT_HOST
+      value: mrt-mainnet
+    - name: LOAD_PORT
+      value: 3727
+    - name: QUERY_PORT
+      value: 3728
+    - name: TX_HOST
+      value: mrt-mainnet
+    - name: TX_PORT
+      value: 3723
+    - name: HTTP_PORT
+      value: 3787
+    - name: OTEL_SERVICE_NAME
+      value: mainnet-marlowe-proxy
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: http://mrt-mainnet:4318
+    - name: TZ
+      value: UTC
+    ports:
     - hostPort: 53700
       containerPort: 3700
-  # startupProbe:
-  #   httpGet:
-  #     path: /startup
-  #     port: 3786
-  #   initialDelaySeconds: 11
-  #   periodSeconds: 20
-  # livenessProbe:
-  #   httpGet:
-  #     path: /live
-  #     port: 3786
-  #   initialDelaySeconds: 53
-  #   periodSeconds: 20
-  # readinessProbe:
-  #   httpGet:
-  #     path: /ready
-  #     port: 3786
-  #   initialDelaySeconds: 79
-  #   periodSeconds: 20
-    resources: {}
-    securityContext:
-      capabilities: {}
+    - hostPort: 53701
+      containerPort: 3701
+    - hostPort: 53787
+      containerPort: 3787
+##  resources: {}
+##  securityContext:
+##    capabilities: {}
+##    runAsGroup: 0
+##    runAsUser: 0
+  
   - name: web-server
-    image: docker.io/bwbush/marlowe-web-server:v0.0.1
+    image: docker.io/bwbush/marlowe-web-server:20230601a
+    depends_on:
+    - proxy
     env:
-    - name: RUNTIME_PORT
-      value: "3700"
     - name: PORT
-      value: "3780"
+      value: 3780
     - name: RUNTIME_HOST
-      value: mrt
+      value: mrt-mainnet
+    - name: RUNTIME_PORT
+      value: 3701
+    - name: OTEL_SERVICE_NAME
+      value: mainnet-marlowe-web-server
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: http://mrt-mainnet:4318
+    - name: TZ
+      value: UTC
     ports:
     - hostPort: 53780
       containerPort: 3780
-    resources: {}
-    securityContext:
-      capabilities: {}
+##  resources: {}
+##  securityContext:
+##    capabilities: {}
+##    runAsGroup: 0
+##    runAsUser: 0
+
+  volumes:
+  - name: otel-config
+    hostPath:
+      type: File
+      path: ./config/otel-collector-config.yml
+  - name: shared
+    hostPath:
+      type: Directory
+      path: ./.
+  - name: contracts
+    hostPath:
+      type: Directory
+      path: ./contracts
+  - name: node-db
+    hostPath:
+      type: Directory
+      path: ./node.db
+
+  restartPolicy: Always
   enableServiceLinks: false
   automountServiceAccountToken: false
-  restartPolicy: Always
-  volumes:
-  - hostPath:
-      path: ./.
-      type: Directory
-    name: shared
-  - hostPath:
-      path: ./node.db
-      type: Directory
-    name: node-db
+
 status: {}
+
