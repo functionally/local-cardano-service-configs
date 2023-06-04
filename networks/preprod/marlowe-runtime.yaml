@@ -28,11 +28,6 @@ spec:
     volumeMounts:
     - mountPath: /etc/otel-collector-config.yml
       name: otel-config
-##  resources: {}
-##  securityContext:
-##    capabilities: {}
-##    runAsGroup: 0
-##    runAsUser: 0
 
   - name: node
     image: docker.io/inputoutput/cardano-node:1.35.4
@@ -46,14 +41,9 @@ spec:
       name: shared
     - mountPath: /data/db
       name: node-db
-##  resources: {}
-##  securityContext:
-##    capabilities: {}
-##    runAsGroup: 0
-##    runAsUser: 0
 
   - name: chain-indexer
-    image: docker.io/bwbush/marlowe-chain-indexer:20230601a
+    image: docker.io/bwbush/marlowe-chain-indexer:20230603a
     depends_on:
     - node
     env:
@@ -85,14 +75,9 @@ spec:
       name: shared
     - mountPath: /data/db
       name: node-db
-##  resources: {}
-##  securityContext:
-##    capabilities: {}
-##    runAsGroup: 0
-##    runAsUser: 0
 
   - name: chain-sync
-    image: docker.io/bwbush/marlowe-chain-sync:20230601a
+    image: docker.io/bwbush/marlowe-chain-sync:20230603a
     depends_on:
     - node
     env:
@@ -136,14 +121,9 @@ spec:
     volumeMounts:
     - mountPath: /ipc
       name: shared
-##  resources: {}
-##  securityContext:
-##    capabilities: {}
-##    runAsGroup: 0
-##    runAsUser: 0
 
   - name: marlowe-indexer
-    image: docker.io/bwbush/marlowe-indexer:20230601a
+    image: docker.io/bwbush/marlowe-indexer:20230603a
     depends_on:
     - chain-sync
     env:
@@ -172,14 +152,9 @@ spec:
     ports:
     - hostPort: 13783
       containerPort: 3783
-##  resources: {}
-##  securityContext:
-##    capabilities: {}
-##    runAsGroup: 0
-##    runAsUser: 0
 
   - name: marlowe-sync
-    image: docker.io/bwbush/marlowe-sync:20230601a
+    image: docker.io/bwbush/marlowe-sync:20230603a
     env:
     - name: DB_HOST
       value: host.containers.internal
@@ -214,50 +189,9 @@ spec:
       containerPort: 3726
     - hostPort: 13784
       containerPort: 3784
-##  resources: {}
-##  securityContext:
-##    capabilities: {}
-##    runAsGroup: 0
-##    runAsUser: 0
-  
-  - name: tx
-    image: docker.io/bwbush/marlowe-tx:20230601a
-    depends_on:
-    - chain-sync
-    env:
-    - name: HOST
-      value: mrt-preprod
-    - name: PORT
-      value: 3723
-    - name: MARLOWE_CHAIN_SYNC_HOST
-      value: mrt-preprod
-    - name: MARLOWE_CHAIN_SYNC_PORT
-      value: 3715
-    - name: MARLOWE_CHAIN_SYNC_QUERY_PORT
-      value: 3716
-    - name: MARLOWE_CHAIN_SYNC_COMMAND_PORT
-      value: 3720
-    - name: HTTP_PORT
-      value: 3785
-    - name: OTEL_SERVICE_NAME
-      value: preprod-marlowe-tx
-    - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: http://mrt-preprod:4318
-    - name: TZ
-      value: UTC
-    ports:
-    - hostPort: 13723
-      containerPort: 3723
-    - hostPort: 13785
-      containerPort: 3785
-##  resources: {}
-##  securityContext:
-##    capabilities: {}
-##    runAsGroup: 0
-##    runAsUser: 0
   
   - name: contract
-    image: docker.io/bwbush/marlowe-contract:20230601a
+    image: docker.io/bwbush/marlowe-contract:20230603a
     env:
     - name: HOST
       value: mrt-preprod
@@ -285,14 +219,44 @@ spec:
     volumeMounts:
     - mountPath: /store
       name: contracts
-##  resources: {}
-##  securityContext:
-##    capabilities: {}
-##    runAsGroup: 0
-##    runAsUser: 0
+  
+  - name: tx
+    image: docker.io/bwbush/marlowe-tx:20230603a
+    depends_on:
+    - chain-sync
+    env:
+    - name: HOST
+      value: mrt-preprod
+    - name: PORT
+      value: 3723
+    - name: MARLOWE_CHAIN_SYNC_HOST
+      value: mrt-preprod
+    - name: MARLOWE_CHAIN_SYNC_PORT
+      value: 3715
+    - name: MARLOWE_CHAIN_SYNC_QUERY_PORT
+      value: 3716
+    - name: MARLOWE_CHAIN_SYNC_COMMAND_PORT
+      value: 3720
+    - name: HTTP_PORT
+      value: 3785
+    - name: CONTRACT_HOST
+      value: mrt-preprod
+    - name: CONTRACT_QUERY_PORT
+      value: 3728
+    - name: OTEL_SERVICE_NAME
+      value: preprod-marlowe-tx
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: http://mrt-preprod:4318
+    - name: TZ
+      value: UTC
+    ports:
+    - hostPort: 13723
+      containerPort: 3723
+    - hostPort: 13785
+      containerPort: 3785
   
   - name: proxy
-    image: docker.io/bwbush/marlowe-proxy:20230601a
+    image: docker.io/bwbush/marlowe-proxy:20230603a
     depends_on:
     - marlowe-sync
     - tx
@@ -316,7 +280,7 @@ spec:
       value: mrt-preprod
     - name: LOAD_PORT
       value: 3727
-    - name: QUERY_PORT
+    - name: CONTRACT_QUERY_PORT
       value: 3728
     - name: TX_HOST
       value: mrt-preprod
@@ -337,14 +301,9 @@ spec:
       containerPort: 3701
     - hostPort: 13787
       containerPort: 3787
-##  resources: {}
-##  securityContext:
-##    capabilities: {}
-##    runAsGroup: 0
-##    runAsUser: 0
   
   - name: web-server
-    image: docker.io/bwbush/marlowe-web-server:20230601a
+    image: docker.io/bwbush/marlowe-web-server:20230603a
     depends_on:
     - proxy
     env:
@@ -363,11 +322,6 @@ spec:
     ports:
     - hostPort: 13780
       containerPort: 3780
-##  resources: {}
-##  securityContext:
-##    capabilities: {}
-##    runAsGroup: 0
-##    runAsUser: 0
 
   volumes:
   - name: otel-config
