@@ -34,7 +34,7 @@ spec:
       name: shared
     resources:
       limits:
-        memory: 32Gi
+        memory: 16G
 
   enableServiceLinks: false
   automountServiceAccountToken: false

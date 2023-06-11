@@ -12,18 +12,41 @@ exporters:
     endpoint: "host.containers.internal:4317"
     tls:
       insecure: true
-  logging:
+  file/traces:
+    path: /dev/null
+  file/metrics:
+    path: /dev/null
+  file/logs:
+    path: /dev/null
 
 processors:
   batch:
+  filter/discard:
+    traces:
+      span:
+        - 'false'
+      spanevent:
+        - 'false'
+    metrics:
+      metric:
+        - 'false'
+      datapoint:
+        - 'false'
+    logs:
+      log_record:
+        - 'false'
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp, logging]
+      processors: [filter/discard]
+      exporters: [file/traces]
+    metrics:
+      receivers: [otlp]
+      processors: [filter/discard]
+      exporters: [file/metrics]
     logs:
       receivers: [otlp]
-      processors: [batch]
-      exporters: [logging]
+      processors: [filter/discard]
+      exporters: [file/logs]
