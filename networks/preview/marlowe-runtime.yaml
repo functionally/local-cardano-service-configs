@@ -240,7 +240,7 @@ spec:
     - name: HTTP_PORT
       value: 3785
     - name: CONTRACT_HOST
-      value: mrt-preprod
+      value: mrt-preview
     - name: CONTRACT_QUERY_PORT
       value: 3728
     - name: OTEL_SERVICE_NAME
