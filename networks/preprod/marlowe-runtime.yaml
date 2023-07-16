@@ -14,21 +14,6 @@ spec:
 
   containers:
 
-  - name: otel-collector
-    image: docker.io/otel/opentelemetry-collector-contrib:0.76.1
-    args:
-    - --config=/etc/otel-collector-config.yml
-    ports:
-    - hostPort: 14317
-      containerPort: 4317
-    - hostPort: 14318
-      containerPort: 4318
-    - hostPort: 18888
-      containerPort: 8888
-    volumeMounts:
-    - mountPath: /etc/otel-collector-config.yml
-      name: otel-config
-
   - name: node
     image: docker.io/inputoutput/cardano-node:1.35.4
     command:
@@ -43,7 +28,7 @@ spec:
       name: node-db
 
   - name: chain-indexer
-    image: docker.io/bwbush/marlowe-chain-indexer:cd9e967c106e6c62e446d267953221ffda9488f0
+    image: ghcr.io/input-output-hk/marlowe-chain-indexer:0.0.3
     depends_on:
     - node
     env:
@@ -61,12 +46,6 @@ spec:
       value: preprod
     - name: HTTP_PORT
       value: 3781
-    - name: OTEL_SERVICE_NAME
-      value: preprod-chain-indexer
-    - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: http://mrt-preprod:4318
-    - name: TZ
-      value: UTC
     ports:
     - hostPort: 13781
       containerPort: 3781
@@ -77,7 +56,7 @@ spec:
       name: node-db
 
   - name: chain-sync
-    image: docker.io/bwbush/marlowe-chain-sync:cd9e967c106e6c62e446d267953221ffda9488f0
+    image: ghcr.io/input-output-hk/marlowe-chain-sync:0.0.3
     depends_on:
     - node
     env:
@@ -103,12 +82,6 @@ spec:
       value: preprod
     - name: HTTP_PORT
       value: 3782
-    - name: OTEL_SERVICE_NAME
-      value: preprod-chain-sync
-    - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: http://mrt-preprod:4318
-    - name: TZ
-      value: UTC
     ports:
     - hostPort: 13715
       containerPort: 3715
@@ -123,39 +96,16 @@ spec:
       name: shared
 
   - name: marlowe-indexer
-    image: docker.io/bwbush/marlowe-indexer:cd9e967c106e6c62e446d267953221ffda9488f0
+    image: ghcr.io/input-output-hk/marlowe-indexer:0.0.3
     depends_on:
     - chain-sync
     env:
-    - name: DB_HOST
-      value: host.containers.internal
-    - name: DB_USER
-      value: cardano
-    - name: DB_PASS
-      value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
-    - name: DB_NAME
-      value: preprod
     - name: MARLOWE_CHAIN_SYNC_HOST
       value: mrt-preprod
     - name: MARLOWE_CHAIN_SYNC_PORT
       value: 3715
     - name: MARLOWE_CHAIN_SYNC_QUERY_PORT
       value: 3716
-    - name: HTTP_PORT
-      value: 3783
-    - name: OTEL_SERVICE_NAME
-      value: preprod-marlowe-indexer
-    - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: http://mrt-preprod:4318
-    - name: TZ
-      value: UTC
-    ports:
-    - hostPort: 13783
-      containerPort: 3783
-
-  - name: marlowe-sync
-    image: docker.io/bwbush/marlowe-sync:cd9e967c106e6c62e446d267953221ffda9488f0
-    env:
     - name: DB_HOST
       value: host.containers.internal
     - name: DB_USER
@@ -164,6 +114,15 @@ spec:
       value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
     - name: DB_NAME
       value: preprod
+    - name: HTTP_PORT
+      value: 3783
+    ports:
+    - hostPort: 13783
+      containerPort: 3783
+
+  - name: marlowe-sync
+    image: ghcr.io/input-output-hk/marlowe-sync:0.0.3
+    env:
     - name: HOST
       value: mrt-preprod
     - name: MARLOWE_SYNC_PORT
@@ -172,14 +131,16 @@ spec:
       value: 3725
     - name: MARLOWE_QUERY_PORT
       value: 3726
+    - name: DB_HOST
+      value: host.containers.internal
+    - name: DB_USER
+      value: cardano
+    - name: DB_PASS
+      value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
+    - name: DB_NAME
+      value: preprod
     - name: HTTP_PORT
       value: 3784
-    - name: OTEL_SERVICE_NAME
-      value: preprod-marlowe-sync
-    - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: http://mrt-preprod:4318
-    - name: TZ
-      value: UTC
     ports:
     - hostPort: 13724
       containerPort: 3724
@@ -191,7 +152,7 @@ spec:
       containerPort: 3784
   
   - name: contract
-    image: docker.io/bwbush/marlowe-contract:cd9e967c106e6c62e446d267953221ffda9488f0
+    image: ghcr.io/input-output-hk/marlowe-contract:0.0.3
     env:
     - name: HOST
       value: mrt-preprod
@@ -203,12 +164,6 @@ spec:
       value: /store
     - name: HTTP_PORT
       value: 3786
-    - name: OTEL_SERVICE_NAME
-      value: preprod-marlowe-contract
-    - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: http://mrt-preprod:4318
-    - name: TZ
-      value: UTC
     ports:
     - hostPort: 13727
       containerPort: 3727
@@ -221,7 +176,7 @@ spec:
       name: contracts
   
   - name: tx
-    image: docker.io/bwbush/marlowe-tx:cd9e967c106e6c62e446d267953221ffda9488f0
+    image: ghcr.io/input-output-hk/marlowe-tx:0.0.3
     depends_on:
     - chain-sync
     env:
@@ -237,18 +192,12 @@ spec:
       value: 3716
     - name: MARLOWE_CHAIN_SYNC_COMMAND_PORT
       value: 3720
-    - name: HTTP_PORT
-      value: 3785
     - name: CONTRACT_HOST
       value: mrt-preprod
     - name: CONTRACT_QUERY_PORT
       value: 3728
-    - name: OTEL_SERVICE_NAME
-      value: preprod-marlowe-tx
-    - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: http://mrt-preprod:4318
-    - name: TZ
-      value: UTC
+    - name: HTTP_PORT
+      value: 3785
     ports:
     - hostPort: 13723
       containerPort: 3723
@@ -256,7 +205,7 @@ spec:
       containerPort: 3785
   
   - name: proxy
-    image: docker.io/bwbush/marlowe-proxy:cd9e967c106e6c62e446d267953221ffda9488f0
+    image: ghcr.io/input-output-hk/marlowe-proxy:0.0.3
     depends_on:
     - marlowe-sync
     - tx
@@ -268,6 +217,10 @@ spec:
       value: 3700
     - name: TRACED_PORT
       value: 3701
+    - name: TX_HOST
+      value: mrt-preprod
+    - name: TX_PORT
+      value: 3723
     - name: SYNC_HOST
       value: mrt-preprod
     - name: MARLOWE_SYNC_PORT
@@ -282,18 +235,8 @@ spec:
       value: 3727
     - name: CONTRACT_QUERY_PORT
       value: 3728
-    - name: TX_HOST
-      value: mrt-preprod
-    - name: TX_PORT
-      value: 3723
     - name: HTTP_PORT
       value: 3787
-    - name: OTEL_SERVICE_NAME
-      value: preprod-marlowe-proxy
-    - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: http://mrt-preprod:4318
-    - name: TZ
-      value: UTC
     ports:
     - hostPort: 13700
       containerPort: 3700
@@ -303,7 +246,7 @@ spec:
       containerPort: 3787
   
   - name: web-server
-    image: docker.io/bwbush/marlowe-web-server:cd9e967c106e6c62e446d267953221ffda9488f0
+    image: ghcr.io/input-output-hk/marlowe-web-server:0.0.3
     depends_on:
     - proxy
     env:
@@ -313,21 +256,11 @@ spec:
       value: mrt-preprod
     - name: RUNTIME_PORT
       value: 3701
-    - name: OTEL_SERVICE_NAME
-      value: preprod-marlowe-web-server
-    - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: http://mrt-preprod:4318
-    - name: TZ
-      value: UTC
     ports:
-    - hostPort: 13780
+    - hostPort: 3780
       containerPort: 3780
 
   volumes:
-  - name: otel-config
-    hostPath:
-      type: File
-      path: ./config/otel-collector-config.yml
   - name: shared
     hostPath:
       type: Directory
