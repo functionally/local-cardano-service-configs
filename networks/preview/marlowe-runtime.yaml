@@ -28,7 +28,7 @@ spec:
       name: node-db
 
   - name: chain-indexer
-    image: ghcr.io/input-output-hk/marlowe-chain-indexer:0.0.3
+    image: ghcr.io/input-output-hk/marlowe-chain-indexer:latest
     depends_on:
     - node
     env:
@@ -46,9 +46,6 @@ spec:
       value: preview
     - name: HTTP_PORT
       value: 3781
-    ports:
-    - hostPort: 23781
-      containerPort: 3781
     volumeMounts:
     - mountPath: /ipc
       name: shared
@@ -56,7 +53,7 @@ spec:
       name: node-db
 
   - name: chain-sync
-    image: ghcr.io/input-output-hk/marlowe-chain-sync:0.0.3
+    image: ghcr.io/input-output-hk/marlowe-chain-sync:latest
     depends_on:
     - node
     env:
@@ -89,14 +86,12 @@ spec:
       containerPort: 3716
     - hostPort: 23720
       containerPort: 3720
-    - hostPort: 23782
-      containerPort: 3782
     volumeMounts:
     - mountPath: /ipc
       name: shared
 
   - name: marlowe-indexer
-    image: ghcr.io/input-output-hk/marlowe-indexer:0.0.3
+    image: ghcr.io/input-output-hk/marlowe-indexer:latest
     depends_on:
     - chain-sync
     env:
@@ -116,13 +111,14 @@ spec:
       value: preview
     - name: HTTP_PORT
       value: 3783
-    ports:
-    - hostPort: 23783
-      containerPort: 3783
 
   - name: marlowe-sync
-    image: ghcr.io/input-output-hk/marlowe-sync:0.0.3
+    image: ghcr.io/input-output-hk/marlowe-sync:latest
     env:
+    - name: MARLOWE_CHAIN_SYNC_HOST
+      value: mrt-preprod
+    - name: MARLOWE_CHAIN_SYNC_QUERY_PORT
+      value: 3716
     - name: HOST
       value: mrt-preview
     - name: MARLOWE_SYNC_PORT
@@ -148,11 +144,9 @@ spec:
       containerPort: 3725
     - hostPort: 23726
       containerPort: 3726
-    - hostPort: 23784
-      containerPort: 3784
   
   - name: contract
-    image: ghcr.io/input-output-hk/marlowe-contract:0.0.3
+    image: ghcr.io/input-output-hk/marlowe-contract:latest
     env:
     - name: HOST
       value: mrt-preview
@@ -160,6 +154,8 @@ spec:
       value: 3727
     - name: QUERY_PORT
       value: 3728
+    - name: TRANSFER_PORT
+      value: 3729
     - name: STORE_DIR
       value: /store
     - name: HTTP_PORT
@@ -169,14 +165,14 @@ spec:
       containerPort: 3727
     - hostPort: 23728
       containerPort: 3728
-    - hostPort: 23786
-      containerPort: 3786
+    - hostPort: 23729
+      containerPort: 3729
     volumeMounts:
     - mountPath: /store
       name: contracts
   
   - name: tx
-    image: ghcr.io/input-output-hk/marlowe-tx:0.0.3
+    image: ghcr.io/input-output-hk/marlowe-tx:latest
     depends_on:
     - chain-sync
     env:
@@ -201,11 +197,9 @@ spec:
     ports:
     - hostPort: 23723
       containerPort: 3723
-    - hostPort: 23785
-      containerPort: 3785
   
   - name: proxy
-    image: ghcr.io/input-output-hk/marlowe-proxy:0.0.3
+    image: ghcr.io/input-output-hk/marlowe-proxy:latest
     depends_on:
     - marlowe-sync
     - tx
@@ -235,6 +229,8 @@ spec:
       value: 3727
     - name: CONTRACT_QUERY_PORT
       value: 3728
+    - name: TRANSFER_PORT
+      value: 3729
     - name: HTTP_PORT
       value: 3787
     ports:
@@ -242,11 +238,9 @@ spec:
       containerPort: 3700
     - hostPort: 23701
       containerPort: 3701
-    - hostPort: 23787
-      containerPort: 3787
   
   - name: web-server
-    image: ghcr.io/input-output-hk/marlowe-web-server:0.0.3
+    image: ghcr.io/input-output-hk/marlowe-web-server:latest
     depends_on:
     - proxy
     env:
