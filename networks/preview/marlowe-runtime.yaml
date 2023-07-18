@@ -28,7 +28,7 @@ spec:
       name: node-db
 
   - name: chain-indexer
-    image: ghcr.io/input-output-hk/marlowe-chain-indexer:latest
+    image: docker.io/bwbush/marlowe-chain-indexer:92af3438faca50394f11275453e02e99797de4b5
     depends_on:
     - node
     env:
@@ -53,7 +53,7 @@ spec:
       name: node-db
 
   - name: chain-sync
-    image: ghcr.io/input-output-hk/marlowe-chain-sync:latest
+    image: docker.io/bwbush/marlowe-chain-sync:92af3438faca50394f11275453e02e99797de4b5
     depends_on:
     - node
     env:
@@ -91,7 +91,7 @@ spec:
       name: shared
 
   - name: marlowe-indexer
-    image: ghcr.io/input-output-hk/marlowe-indexer:latest
+    image: docker.io/bwbush/marlowe-indexer:92af3438faca50394f11275453e02e99797de4b5
     depends_on:
     - chain-sync
     env:
@@ -113,10 +113,10 @@ spec:
       value: 3783
 
   - name: marlowe-sync
-    image: ghcr.io/input-output-hk/marlowe-sync:latest
+    image: docker.io/bwbush/marlowe-sync:92af3438faca50394f11275453e02e99797de4b5
     env:
     - name: MARLOWE_CHAIN_SYNC_HOST
-      value: mrt-preprod
+      value: mrt-preview
     - name: MARLOWE_CHAIN_SYNC_QUERY_PORT
       value: 3716
     - name: HOST
@@ -146,7 +146,7 @@ spec:
       containerPort: 3726
   
   - name: contract
-    image: ghcr.io/input-output-hk/marlowe-contract:latest
+    image: docker.io/bwbush/marlowe-contract:92af3438faca50394f11275453e02e99797de4b5
     env:
     - name: HOST
       value: mrt-preview
@@ -172,7 +172,7 @@ spec:
       name: contracts
   
   - name: tx
-    image: ghcr.io/input-output-hk/marlowe-tx:latest
+    image: docker.io/bwbush/marlowe-tx:92af3438faca50394f11275453e02e99797de4b5
     depends_on:
     - chain-sync
     env:
@@ -199,7 +199,7 @@ spec:
       containerPort: 3723
   
   - name: proxy
-    image: ghcr.io/input-output-hk/marlowe-proxy:latest
+    image: docker.io/bwbush/marlowe-proxy:92af3438faca50394f11275453e02e99797de4b5
     depends_on:
     - marlowe-sync
     - tx
@@ -240,7 +240,7 @@ spec:
       containerPort: 3701
   
   - name: web-server
-    image: ghcr.io/input-output-hk/marlowe-web-server:latest
+    image: docker.io/bwbush/marlowe-web-server:92af3438faca50394f11275453e02e99797de4b5
     depends_on:
     - proxy
     env:
