@@ -2,7 +2,7 @@
 
 set -evo pipefail
 
-TAG=e02c47884e3c84f3eb0aa0857668b28a11f91d40
+TAG=latest
 
 declare -A PKG
 

@@ -11,8 +11,9 @@ sed -e 's/inherit name;/name = "bwbush\/" + name;/' \
     -e 's/tag = ".*";/tag = "'"$TAG"'";/' \
     -i nix/marlowe-cardano/deploy/oci-images.nix
 
-for img in marlowe-chain-indexer marlowe-chain-sync marlowe-indexer marlowe-sync marlowe-contract marlowe-tx marlowe-proxy marlowe-web-server
+for img in marlowe-chain-indexer marlowe-chain-sync marlowe-indexer marlowe-sync marlowe-contract marlowe-tx marlowe-proxy marlowe-web-server marlowe-pipe marlowe-scaling marlowe-oracle marlowe-finder
 do
+  echo $img
   nix build .#oci-images.x86_64-linux.$img
   sed -e 's/0108ad4d4fe2e41705eb8a27292d5bbc350419f3121297582583eb209c10799c/247aed5894d312df05ab7d6bf00da3e7f350a6379cecd7ee523c442e5ea74cae/' \
       -e 's/2824de88f9cb5eb6f2bc799cf7d42f60407e40f3ac76e10c684762edc11d0bf6/d1c0cc333cac999bb92cf1130cf4b5c869ca7bb5f572f3f879feac26acc53b9a/' \
@@ -24,6 +25,13 @@ do
       -e 's/ccbd0277cb43b2b87f1cbb8c2dc5786aa6283ee5ad4cfc8222190eeb1865d0e1/8a2a38cae3bb044243bf76382ecf4b4116caf7cfd86e68f81c6887c65ad96bbb/' \
       -e 's/d9d5ce7a20d99a197215905f00b607c104f84d442b92f07ec33b0200c8f65bc3/f71c670381e320bf62914479c12f1259d0c4eea61967f67fee55aba585533555/' \
       -e 's/3f56da64a8eb8df2a582695b5fb9cc1e37db0928510efaba181f73db2d8c00c4/4176351213ed79171dd9ca8e31753ea3141ca22f9b84619ef23f9fc0551d403a/' \
+      -e 's/aa7d506c2396964faaec1cc751f2937c169f5eff7ccdc8af7aafd67e512e8997/2a65d7a0bac282e3fc172c7eaf0336f40d8f603d0a15fb979c67fa21fcbdc924/' \
+      -e 's/c74d95c56829156a7c1c6e5f90943586745cd7dd513e662f8e80e966ae4b1362/7de1125c2b0aee118771d743655cd037c890c82c29cb6481933783d659cde913/' \
+      -e 's/d783f0f97a7ee15e608dd5d10094cb0a0cd04e6b1fd2cc4ebc4a7505ff689212/ef4b18f91801489757b59b066cbad865d356e64aa8345388c3c80ffda5f3735c/' \
+      -e 's/28dcd93282dd923b63f450e51e02e4b7cf58cf978deacdcc961fbb93550ff411/6830c538fa676584c607a6e340ae07c64b495ae4278eab886fa02bf0051dd4d0/' \
+      -e 's/e2d4c30ae6b6b13127f6d32d45d422e4b7cd0b6963f50e6b643c9f43326a3f2e/d9c7e0ea95a9a28e504c8325e1709cbf6ba15375547698934891fc0fcdd267e6/' \
+      -e 's/4026bb32ac4c50a89b63a32c83715afb03290547986726535a1dd8232d61b7ca/ce9000145f2f3dbe0296d05ce1bd1daac7798001540e877375a2a0c54bc77621/' \
+      -e 's/6f460bb20b34056219fcf261307da887caa9f6cf866e5ef06aa9a60f2c9c9512/6894323f0dfd48c838580e2a3b3b922b71846563e759fdcf4df1a013bc3a2f22/' \
       result > image.json
   /nix/store/scrk5w110g4djnb4fd44w6msvxhq18p7-skopeo-1.11.1/bin/skopeo --insecure-policy \
     copy nix:image.json docker://docker.io/bwbush/$img:$TAG
