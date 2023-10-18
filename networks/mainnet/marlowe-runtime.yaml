@@ -28,7 +28,7 @@ spec:
       name: node-db
 
   - name: chain-indexer
-    image: docker.io/bwbush/marlowe-chain-indexer:5590faa00439f6b605db62b910e9cee7902f83d5
+    image: docker.io/bwbush/marlowe-chain-indexer:23f6c79657b30cbf2bc024b551989eafc67780ef
     depends_on:
     - node
     env:
@@ -53,7 +53,7 @@ spec:
       name: node-db
 
   - name: chain-sync
-    image: docker.io/bwbush/marlowe-chain-sync:5590faa00439f6b605db62b910e9cee7902f83d5
+    image: docker.io/bwbush/marlowe-chain-sync:23f6c79657b30cbf2bc024b551989eafc67780ef
     depends_on:
     - node
     env:
@@ -91,7 +91,7 @@ spec:
       name: shared
 
   - name: marlowe-indexer
-    image: docker.io/bwbush/marlowe-indexer:5590faa00439f6b605db62b910e9cee7902f83d5
+    image: docker.io/bwbush/marlowe-indexer:23f6c79657b30cbf2bc024b551989eafc67780ef
     depends_on:
     - chain-sync
     env:
@@ -113,7 +113,7 @@ spec:
       value: 3783
 
   - name: marlowe-sync
-    image: docker.io/bwbush/marlowe-sync:5590faa00439f6b605db62b910e9cee7902f83d5
+    image: docker.io/bwbush/marlowe-sync:23f6c79657b30cbf2bc024b551989eafc67780ef
     env:
     - name: MARLOWE_CHAIN_SYNC_HOST
       value: mrt-mainnet
@@ -127,6 +127,8 @@ spec:
       value: 3725
     - name: MARLOWE_QUERY_PORT
       value: 3726
+    - name: MARLOWE_BULK_SYNC_PORT
+      value: 3730
     - name: DB_HOST
       value: host.containers.internal
     - name: DB_USER
@@ -144,9 +146,11 @@ spec:
       containerPort: 3725
     - hostPort: 53726
       containerPort: 3726
+    - hostPort: 53730
+      containerPort: 3730
   
   - name: contract
-    image: docker.io/bwbush/marlowe-contract:5590faa00439f6b605db62b910e9cee7902f83d5
+    image: docker.io/bwbush/marlowe-contract:23f6c79657b30cbf2bc024b551989eafc67780ef
     env:
     - name: HOST
       value: mrt-mainnet
@@ -158,6 +162,14 @@ spec:
       value: 3729
     - name: STORE_DIR
       value: /store
+    - name: MARLOWE_CHAIN_SYNC_HOST
+      value: mrt-preprod
+    - name: MARLOWE_CHAIN_SYNC_QUERY_PORT
+      value: 3716
+    - name: SYNC_HOST
+      value: mrt-preprod
+    - name: MARLOWE_BULK_SYNC_PORT
+      value: 3730
     - name: HTTP_PORT
       value: 3786
     ports:
@@ -172,7 +184,7 @@ spec:
       name: contracts
   
   - name: tx
-    image: docker.io/bwbush/marlowe-tx:5590faa00439f6b605db62b910e9cee7902f83d5
+    image: docker.io/bwbush/marlowe-tx:23f6c79657b30cbf2bc024b551989eafc67780ef
     depends_on:
     - chain-sync
     env:
@@ -199,7 +211,7 @@ spec:
       containerPort: 3723
   
   - name: proxy
-    image: docker.io/bwbush/marlowe-proxy:5590faa00439f6b605db62b910e9cee7902f83d5
+    image: docker.io/bwbush/marlowe-proxy:23f6c79657b30cbf2bc024b551989eafc67780ef
     depends_on:
     - marlowe-sync
     - tx
@@ -231,6 +243,10 @@ spec:
       value: 3728
     - name: TRANSFER_PORT
       value: 3729
+    - name: SYNC_HOST
+      value: mrt-preprod
+    - name: MARLOWE_BULK_SYNC_PORT
+      value: 3730
     - name: HTTP_PORT
       value: 3787
     ports:
@@ -240,7 +256,7 @@ spec:
       containerPort: 3701
   
   - name: web-server
-    image: docker.io/bwbush/marlowe-web-server:5590faa00439f6b605db62b910e9cee7902f83d5
+    image: docker.io/bwbush/marlowe-web-server:23f6c79657b30cbf2bc024b551989eafc67780ef
     depends_on:
     - proxy
     env:
