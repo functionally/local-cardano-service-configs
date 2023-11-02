@@ -29,5 +29,5 @@ cd marlowe-cardano
 for exe in ${!PKG[@]}
 do
   pkg=${PKG[$exe]}
-  nix build .#$pkg-exe-$exe -o ../../build/$exe
+  nix build .#$exe -o ../../build/$exe
 done

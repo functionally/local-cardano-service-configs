@@ -28,7 +28,7 @@ spec:
       name: node-db
 
   - name: chain-indexer
-    image: docker.io/bwbush/marlowe-chain-indexer:23f6c79657b30cbf2bc024b551989eafc67780ef
+    image: docker.io/bwbush/marlowe-chain-indexer:04da4711ae2d0cd9ee6a10d57c47793d57ab02d9
     depends_on:
     - node
     env:
@@ -53,7 +53,7 @@ spec:
       name: node-db
 
   - name: chain-sync
-    image: docker.io/bwbush/marlowe-chain-sync:23f6c79657b30cbf2bc024b551989eafc67780ef
+    image: docker.io/bwbush/marlowe-chain-sync:04da4711ae2d0cd9ee6a10d57c47793d57ab02d9
     depends_on:
     - node
     env:
@@ -91,7 +91,7 @@ spec:
       name: shared
 
   - name: marlowe-indexer
-    image: docker.io/bwbush/marlowe-indexer:23f6c79657b30cbf2bc024b551989eafc67780ef
+    image: docker.io/bwbush/marlowe-indexer:04da4711ae2d0cd9ee6a10d57c47793d57ab02d9
     depends_on:
     - chain-sync
     env:
@@ -113,7 +113,7 @@ spec:
       value: 3783
 
   - name: marlowe-sync
-    image: docker.io/bwbush/marlowe-sync:23f6c79657b30cbf2bc024b551989eafc67780ef
+    image: docker.io/bwbush/marlowe-sync:04da4711ae2d0cd9ee6a10d57c47793d57ab02d9
     env:
     - name: MARLOWE_CHAIN_SYNC_HOST
       value: mrt-mainnet
@@ -150,7 +150,7 @@ spec:
       containerPort: 3730
   
   - name: contract
-    image: docker.io/bwbush/marlowe-contract:23f6c79657b30cbf2bc024b551989eafc67780ef
+    image: docker.io/bwbush/marlowe-contract:04da4711ae2d0cd9ee6a10d57c47793d57ab02d9
     env:
     - name: HOST
       value: mrt-mainnet
@@ -184,7 +184,7 @@ spec:
       name: contracts
   
   - name: tx
-    image: docker.io/bwbush/marlowe-tx:23f6c79657b30cbf2bc024b551989eafc67780ef
+    image: docker.io/bwbush/marlowe-tx:04da4711ae2d0cd9ee6a10d57c47793d57ab02d9
     depends_on:
     - chain-sync
     env:
@@ -211,7 +211,7 @@ spec:
       containerPort: 3723
   
   - name: proxy
-    image: docker.io/bwbush/marlowe-proxy:23f6c79657b30cbf2bc024b551989eafc67780ef
+    image: docker.io/bwbush/marlowe-proxy:04da4711ae2d0cd9ee6a10d57c47793d57ab02d9
     depends_on:
     - marlowe-sync
     - tx
@@ -256,7 +256,7 @@ spec:
       containerPort: 3701
   
   - name: web-server
-    image: docker.io/bwbush/marlowe-web-server:23f6c79657b30cbf2bc024b551989eafc67780ef
+    image: docker.io/bwbush/marlowe-web-server:04da4711ae2d0cd9ee6a10d57c47793d57ab02d9
     depends_on:
     - proxy
     env:
