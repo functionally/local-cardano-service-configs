@@ -43,6 +43,9 @@ do
       -e 's/f1669ed4dcc664b29219e4c1d8b1524b5a830f70a67169807493ca178347e26f/67413a4a14cdfacb3364ffb739ded07219919f691e4d7d8c70f739ef1b0b07b0/' \
       -e 's/f07ad2cea53c356d7bb4e6ddf10b58ca00f94ade6f65cbce408bd8b79b5a8b77/d8c0ea71e37841df63d977bb0fe66739423b3a9e8fbbde4f593bbc92db9c92d5/' \
       -e 's/59fed313f0282957388cb6f0ded3cb96731cb07ce1e273b01dcab9ac552af1d6/f10d332f04a560a34da93f63bacd0624e138aded4cd9a703d377fff57bf6708d/' \
+      -e 's/7163a732fd3ecc35e029c6abed270f3a8c54fb2edc6330a5ad65da2f00aa7a62/ecf3acc361348591ef1bfbb1c8aeb018803d05a40fdb880c80a08f4abf77170c/' \
+      -e 's/4dcf5fd5b7bd716092cf05a04c557d064d0469445f5a53a0c8ca9209ff203d56/76a9d957e8251d67719eefe870dc47fd101f5e971337a63287005d0c4c8cd726/' \
+      -e 's/6853789eb20f334c33c631a165c23cb32507ce847f13a31f3e59a57441dcd1b6/d50f0c338d2c4ddf79b65c2ae828ea19722738274c72adeddb7a216e0fe53012/' \
       result > image.json
   /nix/store/scrk5w110g4djnb4fd44w6msvxhq18p7-skopeo-1.11.1/bin/skopeo --insecure-policy \
     copy nix:image.json docker://docker.io/bwbush/$img:$TAG
