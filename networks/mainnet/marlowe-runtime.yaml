@@ -163,11 +163,11 @@ spec:
     - name: STORE_DIR
       value: /store
     - name: MARLOWE_CHAIN_SYNC_HOST
-      value: mrt-preprod
+      value: mrt-mainnet
     - name: MARLOWE_CHAIN_SYNC_QUERY_PORT
       value: 3716
     - name: SYNC_HOST
-      value: mrt-preprod
+      value: mrt-mainnet
     - name: MARLOWE_BULK_SYNC_PORT
       value: 3730
     - name: HTTP_PORT
@@ -244,7 +244,7 @@ spec:
     - name: TRANSFER_PORT
       value: 3729
     - name: SYNC_HOST
-      value: mrt-preprod
+      value: mrt-mainnet
     - name: MARLOWE_BULK_SYNC_PORT
       value: 3730
     - name: HTTP_PORT
