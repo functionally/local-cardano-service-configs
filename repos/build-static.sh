@@ -31,6 +31,6 @@ cd marlowe-cardano
 for exe in ${!PKG[@]}
 do
   pkg=${PKG[$exe]}
-  nix build .#$pkg-exe-$exe.project.projectCross.musl64.hsPkgs.$pkg.components.exes.$exe
-  gsutil cp -P result/bin/$exe gs://dl.marlowestat.org/bin/$TAG/
+  nix build .#$exe.project.projectCross.musl64.hsPkgs.$pkg.components.exes.$exe
+  cp -p result/bin/$exe ../../static/
 done
