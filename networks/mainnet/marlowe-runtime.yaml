@@ -28,7 +28,7 @@ spec:
       name: node-db
 
   - name: chain-indexer
-    image: docker.io/bwbush/marlowe-chain-indexer:0420e2d48dd3279d1b398c4d4edd50b362409795
+    image: docker.io/bwbush/marlowe-chain-indexer:ff9a6c8659cd52bdc62b6624ef066a12f38ae392
     depends_on:
     - node
     env:
@@ -53,7 +53,7 @@ spec:
       name: node-db
 
   - name: chain-sync
-    image: docker.io/bwbush/marlowe-chain-sync:0420e2d48dd3279d1b398c4d4edd50b362409795
+    image: docker.io/bwbush/marlowe-chain-sync:ff9a6c8659cd52bdc62b6624ef066a12f38ae392
     depends_on:
     - node
     env:
@@ -80,18 +80,18 @@ spec:
     - name: HTTP_PORT
       value: 3782
     ports:
-    - hostPort: 53715
+    - hostPort: 43715
       containerPort: 3715
-    - hostPort: 53716
+    - hostPort: 43716
       containerPort: 3716
-    - hostPort: 53720
+    - hostPort: 43720
       containerPort: 3720
     volumeMounts:
     - mountPath: /ipc
       name: shared
 
   - name: marlowe-indexer
-    image: docker.io/bwbush/marlowe-indexer:0420e2d48dd3279d1b398c4d4edd50b362409795
+    image: docker.io/bwbush/marlowe-indexer:ff9a6c8659cd52bdc62b6624ef066a12f38ae392
     depends_on:
     - chain-sync
     env:
@@ -113,7 +113,7 @@ spec:
       value: 3783
 
   - name: marlowe-sync
-    image: docker.io/bwbush/marlowe-sync:0420e2d48dd3279d1b398c4d4edd50b362409795
+    image: docker.io/bwbush/marlowe-sync:ff9a6c8659cd52bdc62b6624ef066a12f38ae392
     env:
     - name: MARLOWE_CHAIN_SYNC_HOST
       value: mrt-mainnet
@@ -140,17 +140,17 @@ spec:
     - name: HTTP_PORT
       value: 3784
     ports:
-    - hostPort: 53724
+    - hostPort: 43724
       containerPort: 3724
-    - hostPort: 53725
+    - hostPort: 43725
       containerPort: 3725
-    - hostPort: 53726
+    - hostPort: 43726
       containerPort: 3726
-    - hostPort: 53730
+    - hostPort: 43730
       containerPort: 3730
   
   - name: contract
-    image: docker.io/bwbush/marlowe-contract:0420e2d48dd3279d1b398c4d4edd50b362409795
+    image: docker.io/bwbush/marlowe-contract:ff9a6c8659cd52bdc62b6624ef066a12f38ae392
     env:
     - name: HOST
       value: mrt-mainnet
@@ -173,18 +173,18 @@ spec:
     - name: HTTP_PORT
       value: 3786
     ports:
-    - hostPort: 53727
+    - hostPort: 43727
       containerPort: 3727
-    - hostPort: 53728
+    - hostPort: 43728
       containerPort: 3728
-    - hostPort: 53729
+    - hostPort: 43729
       containerPort: 3729
     volumeMounts:
     - mountPath: /store
       name: contracts
   
   - name: tx
-    image: docker.io/bwbush/marlowe-tx:0420e2d48dd3279d1b398c4d4edd50b362409795
+    image: docker.io/bwbush/marlowe-tx:ff9a6c8659cd52bdc62b6624ef066a12f38ae392
     depends_on:
     - chain-sync
     env:
@@ -207,11 +207,11 @@ spec:
     - name: HTTP_PORT
       value: 3785
     ports:
-    - hostPort: 53723
+    - hostPort: 43723
       containerPort: 3723
   
   - name: proxy
-    image: docker.io/bwbush/marlowe-proxy:0420e2d48dd3279d1b398c4d4edd50b362409795
+    image: docker.io/bwbush/marlowe-proxy:ff9a6c8659cd52bdc62b6624ef066a12f38ae392
     depends_on:
     - marlowe-sync
     - tx
@@ -250,13 +250,13 @@ spec:
     - name: HTTP_PORT
       value: 3787
     ports:
-    - hostPort: 53700
+    - hostPort: 43700
       containerPort: 3700
-    - hostPort: 53701
+    - hostPort: 43701
       containerPort: 3701
   
   - name: web-server
-    image: docker.io/bwbush/marlowe-web-server:0420e2d48dd3279d1b398c4d4edd50b362409795
+    image: docker.io/bwbush/marlowe-web-server:ff9a6c8659cd52bdc62b6624ef066a12f38ae392
     depends_on:
     - proxy
     env:
@@ -267,7 +267,7 @@ spec:
     - name: RUNTIME_PORT
       value: 3701
     ports:
-    - hostPort: 53780
+    - hostPort: 43780
       containerPort: 3780
 
   volumes:

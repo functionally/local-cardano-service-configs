@@ -8,7 +8,7 @@ spec:
   hostname: dbsync
   containers:
   - name: dbsync
-    image: docker.io/inputoutput/cardano-db-sync:13.1.0.2
+    image: docker.io/inputoutput/cardano-db-sync:13.1.1.3
     env:
     - name: PATH
       value: /usr/bin:/bin
