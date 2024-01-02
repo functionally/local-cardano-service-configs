@@ -31,3 +31,5 @@ do
   deriv=${DERIV[$exe]}
   nix build "$repo#$deriv" -o "../build/$exe"
 done
+
+nix build -o ../build/n2c-skopeo github:nlewo/nix2container#skopeo-nix2container
