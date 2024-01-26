@@ -11,7 +11,7 @@ sed -e 's/inherit name;/name = "bwbush\/" + name;/' \
     -e 's/tag = ".*";/tag = "'"$TAG"'";/' \
     -i nix/marlowe-cardano/deploy/oci-images.nix
 
-for img in marlowe-chain-indexer marlowe-chain-sync marlowe-indexer marlowe-sync marlowe-contract marlowe-tx marlowe-proxy marlowe-web-server marlowe-pipe marlowe-scaling marlowe-oracle marlowe-finder
+for img in marlowe-chain-indexer marlowe-chain-sync marlowe-indexer marlowe-sync marlowe-contract marlowe-tx marlowe-proxy marlowe-web-server
 do
   echo $img
   nix build .#oci-images.x86_64-linux.$img
@@ -55,6 +55,9 @@ do
       -e 's/8aec68f9c44a75fde831315955b6875648d693d201dbc00fae64723186f60e19/4eb18975c581971e0248ae1dab44206be630913cc72a12bd1bc7b4bf71894c50/' \
       -e 's/9841eddc33ce758c1ae67c8fd29aa1e9dd60146617b2fe83c79448f7b05bd060/f8b406d6cd6303c8470ab0c006dcca41f885cbb3eeeaf8ee7817bd3851a69e6a/' \
       -e 's/aa01e571a6922fc9b353ad12ab8cdd661d181433057e6c4c6f0c5f57b9f03e1a/caf6da0006c54933e8a2b0f7f7ef29c82dbae35e09c37e7b0e26d5c827ff869f/' \
+      -e 's/0ecb61704fee7cdd14a8edbc9ea71f6e6ca1c02398130d796fd26cbc6b6b32af/e246035ad2e92d752df12f7945139aa52ff4f91f51b466b91438ae810d214bbe/' \
+      -e 's/0c74e3c19c89242a27833fd32ad670c3ccc545c68c86ea22e54491cb39bd0e23/9523c88d20d9d5e3769c2c24fc95cfe8af65f6b77dd9fceadc3fa23de20a7ab5/' \
+      -e 's/574c9b7729b59de19d0350f714d377f3966447a2c46c8ba586705bf075663021/2602d52d26e24e219e0e3a7ec67e468b285d6f026f50d5b69a0c598ed751da4d/' \
       result > image.json
   /extra/iohk/bin/skopeo --insecure-policy \
     copy nix:image.json docker://docker.io/bwbush/$img:$TAG

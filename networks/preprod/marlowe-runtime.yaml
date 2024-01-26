@@ -1,17 +1,12 @@
 
 apiVersion: v1
-
 kind: Pod
-
 metadata:
   name: mrt-preprod
   labels:
     app: mrt-preprod
-
 spec:
-
   hostname: mrt-preprod
-
   containers:
 
   - name: node
@@ -28,7 +23,7 @@ spec:
       name: node-db
 
   - name: chain-indexer
-    image: docker.io/bwbush/marlowe-chain-indexer:f2b99b2e2fcf78119a1180370ffa881753d26ff2
+    image: docker.io/bwbush/marlowe-chain-indexer:811318bd01960a2b3444eac48ea771496dfa3b16
     depends_on:
     - node
     env:
@@ -53,7 +48,7 @@ spec:
       name: node-db
 
   - name: chain-sync
-    image: docker.io/bwbush/marlowe-chain-sync:f2b99b2e2fcf78119a1180370ffa881753d26ff2
+    image: docker.io/bwbush/marlowe-chain-sync:811318bd01960a2b3444eac48ea771496dfa3b16
     depends_on:
     - node
     env:
@@ -91,7 +86,7 @@ spec:
       name: shared
 
   - name: marlowe-indexer
-    image: docker.io/bwbush/marlowe-indexer:f2b99b2e2fcf78119a1180370ffa881753d26ff2
+    image: docker.io/bwbush/marlowe-indexer:811318bd01960a2b3444eac48ea771496dfa3b16
     depends_on:
     - chain-sync
     env:
@@ -113,7 +108,7 @@ spec:
       value: 3783
 
   - name: marlowe-sync
-    image: docker.io/bwbush/marlowe-sync:f2b99b2e2fcf78119a1180370ffa881753d26ff2
+    image: docker.io/bwbush/marlowe-sync:811318bd01960a2b3444eac48ea771496dfa3b16
     env:
     - name: MARLOWE_CHAIN_SYNC_HOST
       value: mrt-preprod
@@ -150,7 +145,7 @@ spec:
       containerPort: 3730
   
   - name: contract
-    image: docker.io/bwbush/marlowe-contract:f2b99b2e2fcf78119a1180370ffa881753d26ff2
+    image: docker.io/bwbush/marlowe-contract:811318bd01960a2b3444eac48ea771496dfa3b16
     env:
     - name: HOST
       value: mrt-preprod
@@ -184,7 +179,7 @@ spec:
       name: contracts
   
   - name: tx
-    image: docker.io/bwbush/marlowe-tx:f2b99b2e2fcf78119a1180370ffa881753d26ff2
+    image: docker.io/bwbush/marlowe-tx:811318bd01960a2b3444eac48ea771496dfa3b16
     depends_on:
     - chain-sync
     env:
@@ -211,7 +206,7 @@ spec:
       containerPort: 3723
   
   - name: proxy
-    image: docker.io/bwbush/marlowe-proxy:f2b99b2e2fcf78119a1180370ffa881753d26ff2
+    image: docker.io/bwbush/marlowe-proxy:811318bd01960a2b3444eac48ea771496dfa3b16
     depends_on:
     - marlowe-sync
     - tx
@@ -256,7 +251,7 @@ spec:
       containerPort: 3701
   
   - name: web-server
-    image: docker.io/bwbush/marlowe-web-server:f2b99b2e2fcf78119a1180370ffa881753d26ff2
+    image: docker.io/bwbush/marlowe-web-server:811318bd01960a2b3444eac48ea771496dfa3b16
     depends_on:
     - proxy
     env:
@@ -287,6 +282,95 @@ spec:
   restartPolicy: Always
   enableServiceLinks: false
   automountServiceAccountToken: false
-
 status: {}
 
+####---
+####
+####apiVersion: v1
+####kind: Pod
+####metadata:
+####  name: mrx-preprod
+####  labels:
+####    app: mrx-preprod
+####spec:
+####  hostname: mrx-preprod
+####  containers:
+####
+####  - name: benchmark
+####    image: docker.io/bwbush/marlowe-benchmark:811318bd01960a2b3444eac48ea771496dfa3b16
+####    depends_on:
+####    - proxy
+####    env:
+####    - name: MARLOWE_RT_HOST
+####      value: host.containers.internal
+####    - name: MARLOWE_RT_PORT
+####      value: 13700
+####    - name: MARLOWE_BENCHMARK_CONFIG
+####      value: /benchmark/config.json
+####    - name: CARDANO_NODE_SOCKET_PATH
+####      value: /ipc/node.socket
+####    - name: CARDANO_TESTNET_MAGIC
+####      value: 1
+####    - name: FAUCET_ADDRESS
+####      value: /benchmark/faucet.address
+####    - name: FAUCET_SKEY
+####      value: /benchmark/faucet.skey
+####    - name: MARLOWE_BENCHMARK_OUTPUT
+####      value: /benchmark/results.json
+####    volumeMounts:
+####    - mountPath: /ipc
+####      name: shared
+####    - mountPath: /benchmark
+####      name: benchmark
+####
+####  - name: oracle
+####    image: docker.io/bwbush/marlowe-oracle:811318bd01960a2b3444eac48ea771496dfa3b16
+####    depends_on:
+####    - proxy
+####    env:
+####    - name: MARLOWE_RT_HOST
+####      value: host.containers.internal
+####    - name: MARLOWE_RT_PORT
+####      value: 13700
+####    - name: ADDRESS
+####      value: addr_test1vrzq87cu5aefqrfzaaxq4nzjksx3nht25727nprg9ydzsksn2jucp
+####    - name: KEYFILE
+####      value: /oracle/oracle.skey
+####    - name: TIMEOUT_SECONDS
+####      value: 900
+####    - name: BUILD_SECONDS
+####      value: 3
+####    - name: CONFIRM_SECONDS
+####      value: 3
+####    - name: RETRY_SECONDS
+####      value: 10
+####    - name: RETRY_LIMIT
+####      value: 5
+####    - name: POLLING_FREQUENCY
+####      value: 5
+####    - name: REQUEUING_FREQUENCY
+####      value: 20
+####    volumeMounts:
+####    - mountPath: /ipc
+####      name: shared
+####    - mountPath: /oracle
+####      name: oracle
+####
+####  volumes:
+####  - name: shared
+####    hostPath:
+####      type: Directory
+####      path: ./.
+####  - name: benchmark
+####    hostPath:
+####      type: Directory
+####      path: ./benchmark
+####  - name: oracle
+####    hostPath:
+####      type: Directory
+####      path: ./oracle
+####
+####  restartPolicy: Never
+####  enableServiceLinks: false
+####  automountServiceAccountToken: false
+####status: {}
