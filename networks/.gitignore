@@ -1,0 +1,6 @@
+treasury/
+node.db/
+contract.db/
+db-sync.state/
+benchmark-results.json
+*.skey

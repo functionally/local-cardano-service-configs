@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mrx
+  labels:
+    app: mrx
+spec:
+  hostname: mrx
+  containers:
+  - name: marlowe-stat
+    image: ghcr.io/functionally/marlowe-stat:latest
+    env:
+    - name: PGHOST
+      value: host.containers.internal
+    - name: PGPORT
+      value: 5432
+    - name: PGUSER
+      value: cardano
+    - name: PGPASSWORD
+      value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
+    - name: IPFS_API_ADDR
+      value: /ip4/192.168.0.12/tcp/5001
+    - name: IPFS_SERVICE
+      value: pinata
+  restartPolicy: Never
