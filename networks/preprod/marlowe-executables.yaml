@@ -1,0 +1,114 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mrx-preprod
+  labels:
+    app: mrx-preprod
+spec:
+  hostname: mrx-preprod
+  containers:
+  - name: ici
+    image: ghcr.io/functionally/marlowe-ici:latest
+    args:
+      - --ipfs-api
+      - /ip4/192.168.0.12/tcp/5001
+      - --host
+      - mrt-preprod
+      - --port
+      - 3700
+      - --ipns-key
+      - marlowe-ici-preprod
+      - --batch-slot
+      - 48000000
+  - name: clean
+    image: ghcr.io/functionally/marlowe-clean:latest
+    env:     
+    - name: PGHOST       
+      value: host.containers.internal
+    - name: PGPORT     
+      value: 5432
+    - name: PGUSER           
+      value: cardano
+    - name: PGPASSWORD         
+      value: bcb33b5c09e31e3dd5a2b4ff0ee111e6
+    - name: NETWORK
+      value: preprod  
+    - name: CARDANO_NODE_SOCKET_PATH
+      value: /ipc/node.socket
+    - name: CARDANO_TESTNET_MAGIC
+      value: 1
+    - name: MARLOWE_RT_HOST
+      value: mrt-preprod
+    - name: MARLOWE_RT_PORT
+      value: 3780
+    - name: PAYMENT_ADDR
+      value: addr_test1qquu8u4aqtx8nrlazflvztkcuh5ed9xs389t6q27vqzjysynjlzdfawd9kvva673fht7737e3r5j322v7090uqhpn0wqm0wc0h
+    - name: PAYMENT_SKEY
+      value: /keys/payment.skey
+    volumeMounts:    
+    - mountPath: /ipc
+      name: shared      
+    - mountPath: /keys
+      name: keys      
+  - name: benchmark
+    image: ghcr.io/functionally/marlowe-benchmark:latest
+    env:     
+    - name: MARLOWE_RT_HOST
+      value: mrt-preprod
+    - name: MARLOWE_RT_PORT
+      value: 3700
+    - name: MARLOWE_BENCHMARK_CONFIG
+      value: /ipc/benchmark-config.json
+    - name: MARLOWE_BENCHMARK_OUTPUT
+      value: /ipc/benchmark-results.json
+    - name: CARDANO_NODE_SOCKET_PATH
+      value: /ipc/node.socket
+    - name: CARDANO_TESTNET_MAGIC
+      value: 1                       
+    - name: FAUCET_ADDRESS
+      value: /keys/faucet.address
+    - name: FAUCET_SKEY                
+      value: /keys/faucet.skey
+    volumeMounts:
+    - mountPath: /ipc
+      name: shared
+    - mountPath: /keys
+      name: keys
+  - name: oracle
+    image: ghcr.io/functionally/marlowe-oracle:latest
+    env:
+    - name: MARLOWE_RT_HOST
+      value: mrt-preprod
+    - name: MARLOWE_RT_PORT
+      value: 3700
+    - name: ADDRESS
+      value: addr_test1qzy4aluz9zcmxuhuqgjhl457ee0ma0hcq38w62ckaagjwgvnjlzdfawd9kvva673fht7737e3r5j322v7090uqhpn0wq7a2gly
+    - name: KEYFILE
+      value: /keys/oracle.skey
+    - name: TIMEOUT_SECONDS
+      value: 900
+    - name: BUILD_SECONDS
+      value: 3
+    - name: CONFIRM_SECONDS
+      value: 3
+    - name: RETRY_SECONDS
+      value: 10
+    - name: RETRY_LIMIT
+      value: 5
+    - name: POLLING_FREQUENCY
+      value: 5
+    - name: REQUEUING_FREQUENCY
+      value: 20
+    volumeMounts:
+    - mountPath: /keys
+      name: keys
+  volumes:
+  - name: shared
+    hostPath:
+      type: Directory
+      path: ./.
+  - name: keys
+    hostPath:
+      type: Directory
+      path: ./keys
+  restartPolicy: Never

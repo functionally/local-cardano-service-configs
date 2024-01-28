@@ -1,17 +1,12 @@
 
 apiVersion: v1
-
 kind: Pod
-
 metadata:
   name: mrt-preview
   labels:
     app: mrt-preview
-
 spec:
-
   hostname: mrt-preview
-
   containers:
 
   - name: node
@@ -28,7 +23,7 @@ spec:
       name: node-db
 
   - name: chain-indexer
-    image: docker.io/bwbush/marlowe-chain-indexer:811318bd01960a2b3444eac48ea771496dfa3b16
+    image: ghcr.io/functionally/marlowe-chain-indexer:latest
     depends_on:
     - node
     env:
@@ -53,7 +48,7 @@ spec:
       name: node-db
 
   - name: chain-sync
-    image: docker.io/bwbush/marlowe-chain-sync:811318bd01960a2b3444eac48ea771496dfa3b16
+    image: ghcr.io/functionally/marlowe-chain-sync:latest
     depends_on:
     - node
     env:
@@ -79,19 +74,12 @@ spec:
       value: preview
     - name: HTTP_PORT
       value: 3782
-    ports:
-    - hostPort: 23715
-      containerPort: 3715
-    - hostPort: 23716
-      containerPort: 3716
-    - hostPort: 23720
-      containerPort: 3720
     volumeMounts:
     - mountPath: /ipc
       name: shared
 
   - name: marlowe-indexer
-    image: docker.io/bwbush/marlowe-indexer:811318bd01960a2b3444eac48ea771496dfa3b16
+    image: ghcr.io/functionally/marlowe-indexer:latest
     depends_on:
     - chain-sync
     env:
@@ -113,7 +101,7 @@ spec:
       value: 3783
 
   - name: marlowe-sync
-    image: docker.io/bwbush/marlowe-sync:811318bd01960a2b3444eac48ea771496dfa3b16
+    image: ghcr.io/functionally/marlowe-sync:latest
     env:
     - name: MARLOWE_CHAIN_SYNC_HOST
       value: mrt-preview
@@ -139,18 +127,9 @@ spec:
       value: preview
     - name: HTTP_PORT
       value: 3784
-    ports:
-    - hostPort: 23724
-      containerPort: 3724
-    - hostPort: 23725
-      containerPort: 3725
-    - hostPort: 23726
-      containerPort: 3726
-    - hostPort: 23730
-      containerPort: 3730
   
   - name: contract
-    image: docker.io/bwbush/marlowe-contract:811318bd01960a2b3444eac48ea771496dfa3b16
+    image: ghcr.io/functionally/marlowe-contract:latest
     env:
     - name: HOST
       value: mrt-preview
@@ -172,19 +151,12 @@ spec:
       value: 3730
     - name: HTTP_PORT
       value: 3786
-    ports:
-    - hostPort: 23727
-      containerPort: 3727
-    - hostPort: 23728
-      containerPort: 3728
-    - hostPort: 23729
-      containerPort: 3729
     volumeMounts:
     - mountPath: /store
       name: contracts
   
   - name: tx
-    image: docker.io/bwbush/marlowe-tx:811318bd01960a2b3444eac48ea771496dfa3b16
+    image: ghcr.io/functionally/marlowe-tx:latest
     depends_on:
     - chain-sync
     env:
@@ -206,12 +178,9 @@ spec:
       value: 3728
     - name: HTTP_PORT
       value: 3785
-    ports:
-    - hostPort: 23723
-      containerPort: 3723
   
   - name: proxy
-    image: docker.io/bwbush/marlowe-proxy:811318bd01960a2b3444eac48ea771496dfa3b16
+    image: ghcr.io/functionally/marlowe-proxy:latest
     depends_on:
     - marlowe-sync
     - tx
@@ -256,7 +225,7 @@ spec:
       containerPort: 3701
   
   - name: web-server
-    image: docker.io/bwbush/marlowe-web-server:811318bd01960a2b3444eac48ea771496dfa3b16
+    image: ghcr.io/functionally/marlowe-web-server:latest
     depends_on:
     - proxy
     env:
@@ -278,15 +247,10 @@ spec:
   - name: contracts
     hostPath:
       type: Directory
-      path: ./contracts
+      path: ./contract.db
   - name: node-db
     hostPath:
       type: Directory
       path: ./node.db
 
   restartPolicy: Always
-  enableServiceLinks: false
-  automountServiceAccountToken: false
-
-status: {}
-

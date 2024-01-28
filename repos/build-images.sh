@@ -11,7 +11,7 @@ sed -e 's/inherit name;/name = "bwbush\/" + name;/' \
     -e 's/tag = ".*";/tag = "'"$TAG"'";/' \
     -i nix/marlowe-cardano/deploy/oci-images.nix
 
-for img in marlowe-chain-indexer marlowe-chain-sync marlowe-indexer marlowe-sync marlowe-contract marlowe-tx marlowe-proxy marlowe-web-server
+for img in marlowe-chain-indexer marlowe-chain-sync marlowe-indexer marlowe-sync marlowe-contract marlowe-tx marlowe-proxy marlowe-web-server marlowe-oracle marlowe-benchmark
 do
   echo $img
   nix build .#oci-images.x86_64-linux.$img
