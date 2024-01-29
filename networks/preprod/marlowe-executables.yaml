@@ -50,30 +50,6 @@ spec:
       name: shared      
     - mountPath: /keys
       name: keys      
-  - name: benchmark
-    image: ghcr.io/functionally/marlowe-benchmark:latest
-    env:     
-    - name: MARLOWE_RT_HOST
-      value: mrt-preprod
-    - name: MARLOWE_RT_PORT
-      value: 3700
-    - name: MARLOWE_BENCHMARK_CONFIG
-      value: /ipc/benchmark-config.json
-    - name: MARLOWE_BENCHMARK_OUTPUT
-      value: /ipc/benchmark-results.json
-    - name: CARDANO_NODE_SOCKET_PATH
-      value: /ipc/node.socket
-    - name: CARDANO_TESTNET_MAGIC
-      value: 1                       
-    - name: FAUCET_ADDRESS
-      value: /keys/faucet.address
-    - name: FAUCET_SKEY                
-      value: /keys/faucet.skey
-    volumeMounts:
-    - mountPath: /ipc
-      name: shared
-    - mountPath: /keys
-      name: keys
   - name: oracle
     image: ghcr.io/functionally/marlowe-oracle:latest
     env:
@@ -100,6 +76,52 @@ spec:
     - name: REQUEUING_FREQUENCY
       value: 20
     volumeMounts:
+    - mountPath: /keys
+      name: keys
+  volumes:
+  - name: shared
+    hostPath:
+      type: Directory
+      path: ./.
+  - name: keys
+    hostPath:
+      type: Directory
+      path: ./keys
+  restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mrb-preprod
+  labels:
+    app: mrb-preprod
+spec:
+  hostname: mrb-preprod
+  containers:
+  - name: benchmark
+    image: ghcr.io/functionally/marlowe-benchmark:latest
+    env:     
+    - name: MARLOWE_RT_HOST
+      value: mrt-preprod
+    - name: MARLOWE_RT_PORT
+      value: 3700
+    - name: MARLOWE_BENCHMARK_CONFIG
+      value: /ipc/benchmark-config.json
+    - name: MARLOWE_BENCHMARK_OUTPUT
+      value: /ipc/benchmark-results.json
+    - name: CARDANO_NODE_SOCKET_PATH
+      value: /ipc/node.socket
+    - name: CARDANO_TESTNET_MAGIC
+      value: 1                       
+    - name: FAUCET_ADDRESS
+      value: /keys/faucet.address
+    - name: FAUCET_SKEY                
+      value: /keys/faucet.skey
+    volumeMounts:
+    - mountPath: /ipc
+      name: shared
     - mountPath: /keys
       name: keys
   volumes:
